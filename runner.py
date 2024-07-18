@@ -73,6 +73,26 @@ class Board:
                     print(self.board[i][j], end = '  ')
             print()
     
+    def editBoard(self, str):
+        for i in range(63):
+            if str[i] == 'N':
+                break
+            row = i // 8
+            col = i % 8
+            if str[i] == '0':
+                self.board[row][col] = 0
+            elif str[i] == 'w':
+                self.board[row][col] = 1
+            elif str[i] == 'b':
+                self.board[row][col] = -1
+            elif str[i] == 'W':
+                self.board[row][col] = 2
+            elif str[i] == 'B':
+                self.board[row][col] = -2
+            else:
+                print("Invalid input")
+                break
+    
     #Game Logic
     def endGame(self):
         sum = 0
@@ -92,6 +112,50 @@ class Board:
             winner = 1
             return True
         return False
+
+    def moveAvailable(self, turn):
+        for i in range(8):
+            for j in range(8):
+                if turn == 1:
+                    if self.board[i][j] == 1:
+                        if i - 1 >= 0 and j - 1 >= 0 and self.board[i-1][j-1] == 0:
+                            return True
+                        if i - 1 >= 0 and j + 1 < 8 and self.board[i-1][j+1] == 0:
+                            return True
+                        if self.board[i][j] == 2:
+                            if i + 1 < 8 and j - 1 >= 0 and self.board[i+1][j-1] == 0:
+                                return True
+                            if i + 1 < 8 and j + 1 < 8 and self.board[i+1][j+1] == 0:
+                                return True
+                if turn == -1:
+                    if self.board[i][j] == -1:
+                        if i + 1 < 8 and j - 1 >= 0 and self.board[i+1][j-1] == 0:
+                            return True
+                        if i + 1 < 8 and j + 1 < 8 and self.board[i+1][j+1] == 0:
+                            return True
+                        if self.board[i][j] == -2:
+                            if i - 1 >= 0 and j - 1 >= 0 and self.board[i-1][j-1] == 0:
+                                return True
+                            if i - 1 >= 0 and j + 1 < 8 and self.board[i-1][j+1] == 0:
+                                return True
+ 
+    def utility(self):
+        if not self.endGame():
+            return 0
+        if self.moveAvailable(1):
+            return 1
+        if self.moveAvailable(-1):
+            return -1
+        
+        sum = 0
+        for i in range(8):
+            for j in range(8):
+                sum += self.board[i][j]
+        if sum > 0:
+            return 1
+        if sum < 0:
+            return -1
+        return 0 
     
     def availableCapture(self, turn):
         if turn == 1:
@@ -298,7 +362,7 @@ class Board:
                     self.board[x][y] = 0
                     return True
         return False
-
+    
 # play a game
 def playGame():
     board = Board(intialPos)
@@ -319,8 +383,33 @@ def playGame():
     else:
         print("Player 2 wins")
 
+def playGameBot():
+    board = Board(intialPos)
+    board.printBoard()
+    turn = 1
+    while not board.endGame():
+        print("Player ", turn, " turn")
+        if turn == 1:
+            x = int(input("Enter x coordinate: "))
+            y = int(input("Enter y coordinate: "))
+            direction = input("Enter direction: ")
+            if board.movePiece(x, y, direction, turn):
+                board.printBoard()
+                turn = -turn
+            else:
+                print("Invalid move")
+        else:
+            curPos = board.getString()
+            minimaxPos = bp.minimax(curPos, 5, turn)
+            
+            
+    if winner == 1:
+        print("Player 1 wins")
+    else:
+        print("Player 2 wins")
+
 def main():
-    playGame()
+    playGameBot()
 
 if __name__=="__main__": 
     main()
