@@ -339,12 +339,14 @@ class Board:
                     self.board[x-2][y-2] = self.board[x][y]
                     self.board[x][y] = 0
                     self.board[x-1][y-1] = 0
+                    self.promotion()
                     return True
                 if (self.board[x-1][y-1] == 0):
                     if(self.availableCapture(turn)):
                         return False
                     self.board[x-1][y-1] = self.board[x][y]
                     self.board[x][y] = 0
+                    self.promotion()
                     return True
             if (direction == 'R'):
                 if(y == 7 or x == 0):
@@ -359,12 +361,14 @@ class Board:
                     self.board[x-2][y+2] = self.board[x][y]
                     self.board[x][y] = 0
                     self.board[x-1][y+1] = 0
+                    self.promotion()
                     return True
                 if (self.board[x-1][y+1] == 0):
                     if(self.availableCapture(turn)):
                         return False
                     self.board[x-1][y+1] = self.board[x][y]
                     self.board[x][y] = 0
+                    self.promotion()
                     return True
             if (direction == '-L'):
                 if(self.board[x][y] != 2):
@@ -425,12 +429,14 @@ class Board:
                     self.board[x+2][y-2] = self.board[x][y]
                     self.board[x][y] = 0
                     self.board[x+1][y-1] = 0
+                    self.promotion()
                     return True
                 if (self.board[x+1][y-1] == 0):
                     if(self.availableCapture(turn)):
                         return False
                     self.board[x+1][y-1] = self.board[x][y]
                     self.board[x][y] = 0
+                    self.promotion()
                     return True
             if (direction == 'R'):
                 if(y == 7 or x == 7):
@@ -445,12 +451,14 @@ class Board:
                     self.board[x+2][y+2] = self.board[x][y]
                     self.board[x][y] = 0
                     self.board[x+1][y+1] = 0
+                    self.promotion()
                     return True
                 if (self.board[x+1][y+1] == 0):
                     if(self.availableCapture(turn)):
                         return False
                     self.board[x+1][y+1] = self.board[x][y]
                     self.board[x][y] = 0
+                    self.promotion()
                     return True
             if (direction == '-L'):
                 if(self.board[x][y] != -2):
@@ -498,6 +506,13 @@ class Board:
                     return True
         return False
 
+    def promotion(self):
+        for i in range(8):
+            if self.board[0][i] == 1:
+                self.board[0][i] = 2
+            if self.board[7][i] == -1:
+                self.board[7][i] = -2
+        return
 #AI
 
 def min_value(str, depth = 10):
