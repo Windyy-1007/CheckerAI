@@ -3,11 +3,12 @@
 import sys
 import math
 import copy
+import string
 
 # Board and pieces
 intialPos = '0b0b0b0bb0b0b0b00b0b0b0b0000000000000000w0w0w0w00w0w0w0ww0w0w0w0'
 customPos = '0b000000000000000000000000000000000000000000000000000000w0w0w0w0'
-winner = 0
+evalCalls = 0
 
 class Board:
     def __init__(self, str):
@@ -92,7 +93,7 @@ class Board:
                 break
     
     #Game Logic
-    def endGame(self):
+    def endGame(self, turn):
         sum = 0
         for i in range(8):
             for j in range(8):
@@ -109,6 +110,10 @@ class Board:
         if sum == 0:
             winner = 1
             return True
+        
+        if not self.moveAvailable(turn):
+            return True
+                    
         return False
 
     def moveAvailable(self, turn):
@@ -137,8 +142,8 @@ class Board:
                             if i - 1 >= 0 and j + 1 < 8 and self.board[i-1][j+1] == 0:
                                 return True
  
-    def utility(self):
-        if not self.endGame():
+    def utility(self, turn):
+        if not self.endGame(turn):
             return 0
         if self.moveAvailable(1):
             return 1
@@ -500,8 +505,8 @@ def min_value(str, depth = 10):
     backupBoard = Board(str)
     if depth == 0:
         return evaluate(str)
-    if tempBoard.endGame():
-        return tempBoard.utility()
+    if tempBoard.endGame(-1):
+        return tempBoard.utility(-1)
     v = math.inf
     for i in range(8):
         for j in range(8):
@@ -530,8 +535,8 @@ def max_value(str, depth = 10):
     backupBoard = Board(str)
     if depth == 0:
         return evaluate(str)
-    if tempBoard.endGame():
-        return tempBoard.utility()
+    if tempBoard.endGame(1):
+        return tempBoard.utility(1)
     v = -math.inf
     for i in range(8):
         for j in range(8):
@@ -556,6 +561,7 @@ def max_value(str, depth = 10):
     return v
                     
 def minimax(str, depth, turn):
+    print ('Depth= ', depth)
     tempBoard = Board(str)
     backupBoard = Board(str)
     optimalMove = 'N'
@@ -628,10 +634,12 @@ def minimax(str, depth, turn):
                         print(i, j, '-R', -1)
                     tempBoard.board = copy.deepcopy(backupBoard.board)
                     
-    print ('v' ,v)
+    print ('Current evaluation: ' ,v)
     return optimalMove
 
 def evaluate(string):
+    global evalCalls
+    evalCalls += 1
     board = Board(string)
     scoreW = 0.000
     scoreB = 0.000
@@ -642,15 +650,21 @@ def evaluate(string):
             elif board.board[i][j] < 0:
                 scoreB += -board.board[i][j]
     return (scoreW) / (scoreB + scoreW)
-            
-evaluate('0b0b0b0bb0b0b0b00b0b0b0b0000000000000000w0w0w0w00w0w0w0ww0w0w0w0')
 
+def botPlay(str = 'A', difficulty=5, turn=1):
+    num_pieces = 64 - str.count('0')
+    endGameWeigth = 0.025
+    depth = math.floor(difficulty / (endGameWeigth * num_pieces + 1))
+    print ('Depth (bp): ', depth)
+    return minimax(str, depth, turn)
+    
+            
 # play a game
 def playGame():
     board = Board(intialPos)
     board.printBoard()
     turn = 1
-    while not board.endGame():
+    while not board.endGame(turn):
         print("Player ", turn, " turn")
         x = int(input("Enter x coordinate: "))
         y = int(input("Enter y coordinate: "))
@@ -660,7 +674,7 @@ def playGame():
             turn = -turn
         else:
             print("Invalid move")
-    if board.utility() == 1:
+    if board.utility(turn) == 1:
         print("Player 1 wins")
     else:
         print("Player 2 wins")
@@ -669,7 +683,7 @@ def playGameBot():
     board = Board(intialPos)
     board.printBoard()
     turn = 1
-    while not board.endGame():
+    while not board.endGame(turn):
         print("Player ", turn, " turn")
         if turn == 1:
             x = int(input("Enter x coordinate: "))
@@ -682,11 +696,12 @@ def playGameBot():
                 print("Invalid move")
         else:
             curPos = board.getString()
-            suggestedPos = minimax(curPos, 5, -1)
+            suggestedPos = botPlay(curPos, 12, -1)
+            print('Number of evaluations: ', evalCalls)
             board.editBoard(suggestedPos)
             board.printBoard()
             turn = -turn
-    if board.utility() == 1:
+    if board.utility(turn) == 1:
         print("Player 1 wins")
     else:
         print("Player 2 wins")
