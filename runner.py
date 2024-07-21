@@ -7,7 +7,7 @@ import string
 
 # Board and pieces
 intialPos = '0b0b0b0bb0b0b0b00b0b0b0b0000000000000000w0w0w0w00w0w0w0ww0w0w0w0'
-customPos = '0b000000000000000000000000000000000000000000000000000000w0w0w0w0'
+customPos = '0000000000b00000000b0000000000000w0w0w00000000000000000000000000' 
 evalCalls = 0
 
 class Board:
@@ -120,27 +120,26 @@ class Board:
         for i in range(8):
             for j in range(8):
                 if turn == 1:
-                    if self.board[i][j] == 1:
-                        if i - 1 >= 0 and j - 1 >= 0 and self.board[i-1][j-1] == 0:
+                    if self.board[i][j] > 0:
+                        if self.moveAllowed(i, j, 'L', turn):
                             return True
-                        if i - 1 >= 0 and j + 1 < 8 and self.board[i-1][j+1] == 0:
+                        if self.moveAllowed(i, j, 'R', turn):
                             return True
-                        if self.board[i][j] == 2:
-                            if i + 1 < 8 and j - 1 >= 0 and self.board[i+1][j-1] == 0:
-                                return True
-                            if i + 1 < 8 and j + 1 < 8 and self.board[i+1][j+1] == 0:
-                                return True
+                        if self.moveAllowed(i, j, '-L', turn):
+                            return True
+                        if self.moveAllowed(i, j, '-R', turn):
+                            return True
                 if turn == -1:
-                    if self.board[i][j] == -1:
-                        if i + 1 < 8 and j - 1 >= 0 and self.board[i+1][j-1] == 0:
+                    if self.board[i][j] < 0:
+                        if self.moveAllowed(i, j, 'L', turn):
                             return True
-                        if i + 1 < 8 and j + 1 < 8 and self.board[i+1][j+1] == 0:
+                        if self.moveAllowed(i, j, 'R', turn):
                             return True
-                        if self.board[i][j] == -2:
-                            if i - 1 >= 0 and j - 1 >= 0 and self.board[i-1][j-1] == 0:
-                                return True
-                            if i - 1 >= 0 and j + 1 < 8 and self.board[i-1][j+1] == 0:
-                                return True
+                        if self.moveAllowed(i, j, '-L', turn):
+                            return True
+                        if self.moveAllowed(i, j, '-R', turn):
+                            return True
+        return False
  
     def utility(self, turn):
         if not self.endGame(turn):
@@ -189,17 +188,17 @@ class Board:
     def moveAllowed(self, x, y, direction, turn):
         if (self.board[x][y] == 0):
             return False
-        if (turn == 1 and self.board[x][y] == -1):
+        if (turn == 1 and self.board[x][y] < 0):
             return False
-        if (turn == -1 and self.board[x][y] == 1):
+        if (turn == -1 and self.board[x][y] > 0):
             return False
         if turn == 1:
             if (direction == 'L'):
                 if(y == 0 or x == 0):
                     return False
-                if (self.board[x-1][y-1] == 1):
+                if (self.board[x-1][y-1] > 0):
                     return False
-                if (self.board[x-1][y-1] == -1):
+                if (self.board[x-1][y-1] < 0):
                     if(x == 1 or y == 1):
                         return False
                     if(self.board[x-2][y-2] != 0):
@@ -212,9 +211,9 @@ class Board:
             if (direction == 'R'):
                 if(y == 7 or x == 0):
                     return False
-                if (self.board[x-1][y+1] == 1):
+                if (self.board[x-1][y+1] > 0):
                     return False
-                if (self.board[x-1][y+1] == -1):
+                if (self.board[x-1][y+1] < 0):
                     if(x == 1 or y == 6):
                         return False
                     if(self.board[x-2][y+2] != 0):
@@ -229,9 +228,9 @@ class Board:
                     return False
                 if(y == 0 or x == 7):
                     return False
-                if (self.board[x+1][y-1] == -1):
+                if (self.board[x+1][y-1] < 0):
                     return False
-                if (self.board[x+1][y-1] == 1):
+                if (self.board[x+1][y-1] > 0):
                     if(x == 6 or y == 1):
                         return False
                     if(self.board[x+2][y-2] != 0):
@@ -246,9 +245,9 @@ class Board:
                     return False
                 if(y == 7 or x == 7):
                     return False
-                if (self.board[x+1][y+1] == -1):
+                if (self.board[x+1][y+1] < 0):
                     return False
-                if (self.board[x+1][y+1] == 1):
+                if (self.board[x+1][y+1] > 0):
                     if(x == 6 or y == 6):
                         return False
                     if(self.board[x+2][y+2] != 0):
@@ -262,9 +261,9 @@ class Board:
             if (direction == 'L'):
                 if(y == 0 or x == 7):
                     return False
-                if (self.board[x+1][y-1] == -1):
+                if (self.board[x+1][y-1] < 0):
                     return False
-                if (self.board[x+1][y-1] == 1):
+                if (self.board[x+1][y-1] > 0):
                     if(x == 6 or y == 1):
                         return False
                     if(self.board[x+2][y-2] != 0):
@@ -277,9 +276,9 @@ class Board:
             if (direction == 'R'):
                 if(y == 7 or x == 7):
                     return False
-                if (self.board[x+1][y+1] == -1):
+                if (self.board[x+1][y+1] < 0):
                     return False
-                if (self.board[x+1][y+1] == 1):
+                if (self.board[x+1][y+1] > 0):
                     if(x == 6 or y == 6):
                         return False
                     if(self.board[x+2][y+2] != 0):
@@ -294,9 +293,9 @@ class Board:
                     return False
                 if(y == 0 or x == 0):
                     return False
-                if (self.board[x-1][y-1] == 1):
+                if (self.board[x-1][y-1] > 0):
                     return False
-                if (self.board[x-1][y-1] == -1):
+                if (self.board[x-1][y-1] < 0):
                     if(x == 1 or y == 1):
                         return False
                     if(self.board[x-2][y-2] != 0):
@@ -311,9 +310,9 @@ class Board:
                     return False
                 if(y == 7 or x == 0):
                     return False
-                if (self.board[x-1][y+1] == 1):
+                if (self.board[x-1][y+1] > 0):
                     return False
-                if (self.board[x-1][y+1] == -1):
+                if (self.board[x-1][y+1] < 0):
                     if(x == 1 or y == 6):
                         return False
         return False
@@ -321,17 +320,17 @@ class Board:
     def move(self, x, y, direction, turn):
         if (self.board[x][y] == 0):
             return False
-        if (turn == 1 and self.board[x][y] == -1):
+        if (turn == 1 and self.board[x][y] < 0):
             return False
-        if (turn == -1 and self.board[x][y] == 1):
+        if (turn == -1 and self.board[x][y] > 0):
             return False
         if turn == 1:
             if (direction == 'L'):
                 if(y == 0 or x == 0):
                     return False
-                if (self.board[x-1][y-1] == 1):
+                if (self.board[x-1][y-1] > 0):
                     return False
-                if (self.board[x-1][y-1] == -1):
+                if (self.board[x-1][y-1] < 0):
                     if(x == 1 or y == 1):
                         return False
                     if(self.board[x-2][y-2] != 0):
@@ -340,6 +339,11 @@ class Board:
                     self.board[x][y] = 0
                     self.board[x-1][y-1] = 0
                     self.promotion()
+                    # Capture multiple piece
+                    if(self.availableCapture(turn)):
+                        for i in ['L', 'R', '-L', '-R']:
+                            if self.move(x-2, y-2, i, turn):
+                                return True
                     return True
                 if (self.board[x-1][y-1] == 0):
                     if(self.availableCapture(turn)):
@@ -351,9 +355,9 @@ class Board:
             if (direction == 'R'):
                 if(y == 7 or x == 0):
                     return False
-                if (self.board[x-1][y+1] == 1):
+                if (self.board[x-1][y+1] > 0):
                     return False
-                if (self.board[x-1][y+1] == -1):
+                if (self.board[x-1][y+1] < 0):
                     if(x == 1 or y == 6):
                         return False
                     if(self.board[x-2][y+2] != 0):
@@ -375,9 +379,9 @@ class Board:
                     return False
                 if(y == 0 or x == 7):
                     return False
-                if (self.board[x+1][y-1] == -1):
+                if (self.board[x+1][y-1] < 0):
                     return False
-                if (self.board[x+1][y-1] == 1):
+                if (self.board[x+1][y-1] > 0):
                     if(x == 6 or y == 1):
                         return False
                     if(self.board[x+2][y-2] != 0):
@@ -397,9 +401,9 @@ class Board:
                     return False
                 if(y == 7 or x == 7):
                     return False
-                if (self.board[x+1][y+1] == -1):
+                if (self.board[x+1][y+1] < 0):
                     return False
-                if (self.board[x+1][y+1] == 1):
+                if (self.board[x+1][y+1] > 0):
                     if(x == 6 or y == 6):
                         return False
                     if(self.board[x+2][y+2] != 0):
@@ -419,9 +423,9 @@ class Board:
             if (direction == 'L'):
                 if(y == 0 or x == 7):
                     return False
-                if (self.board[x+1][y-1] == -1):
+                if (self.board[x+1][y-1] < 0):
                     return False
-                if (self.board[x+1][y-1] == 1):
+                if (self.board[x+1][y-1] > 0):
                     if(x == 6 or y == 1):
                         return False
                     if(self.board[x+2][y-2] != 0):
@@ -441,9 +445,9 @@ class Board:
             if (direction == 'R'):
                 if(y == 7 or x == 7):
                     return False
-                if (self.board[x+1][y+1] == -1):
+                if (self.board[x+1][y+1] < 0):
                     return False
-                if (self.board[x+1][y+1] == 1):
+                if (self.board[x+1][y+1] > 0):
                     if(x == 6 or y == 6):
                         return False
                     if(self.board[x+2][y+2] != 0):
@@ -465,9 +469,9 @@ class Board:
                     return False
                 if(y == 0 or x == 0):
                     return False
-                if (self.board[x-1][y-1] == 1):
+                if (self.board[x-1][y-1] > 0):
                     return False
-                if (self.board[x-1][y-1] == -1):
+                if (self.board[x-1][y-1] < 0):
                     if(x == 1 or y == 1):
                         return False
                     if(self.board[x-2][y-2] != 0):
@@ -487,9 +491,9 @@ class Board:
                     return False
                 if(y == 7 or x == 0):
                     return False
-                if (self.board[x-1][y+1] == 1):
+                if (self.board[x-1][y+1] > 0):
                     return False
-                if (self.board[x-1][y+1] == -1):
+                if (self.board[x-1][y+1] < 0):
                     if(x == 1 or y == 6):
                         return False
                     if(self.board[x-2][y+2] != 0):
@@ -513,7 +517,22 @@ class Board:
             if self.board[7][i] == -1:
                 self.board[7][i] = -2
         return
+
+    def betterPrintBoard(self):
+        print('  0 1 2 3 4 5 6 7')
+        for i in range(8):
+            print(i, end=' ')
+            for j in range(8):
+                if (self.board[i][j] == 0):
+                    print('.', end = ' ')
+                
+                elif(self.board[i][j] > 0):
+                    print(self.board[i][j], end = ' ')
+                else:
+                    print(self.board[i][j], end = '')
+            print()
 #AI
+
 
 def min_value(str, depth = 10):
     tempBoard = Board(str)
@@ -648,7 +667,6 @@ def minimax(str, depth, turn):
                         optimalMove = tempBoard.getString()
                         print(i, j, '-R', -1)
                     tempBoard.board = copy.deepcopy(backupBoard.board)
-                    
     print ('Current evaluation: ' ,v)
     return optimalMove
 
@@ -664,7 +682,7 @@ def evaluate(string):
                 scoreW += board.board[i][j]
             elif board.board[i][j] < 0:
                 scoreB += -board.board[i][j]
-    return (scoreW) / (scoreB + scoreW)
+    return round((scoreW) / (scoreB + scoreW),2)
 
 def botPlay(str = 'A', difficulty=5, turn=1):
     num_pieces = 64 - str.count('0')
@@ -696,7 +714,7 @@ def playGame():
 
 def playGameBot():
     board = Board(intialPos)
-    board.printBoard()
+    board.betterPrintBoard()
     turn = 1
     while not board.endGame(turn):
         print("Player ", turn, " turn")
@@ -705,16 +723,16 @@ def playGameBot():
             y = int(input("Enter y coordinate: "))
             direction = input("Enter direction: ")
             if board.move(x, y, direction, turn):
-                board.printBoard()
+                board.betterPrintBoard()
                 turn = -turn
             else:
                 print("Invalid move")
         else:
             curPos = board.getString()
-            suggestedPos = botPlay(curPos, 12, -1)
+            suggestedPos = minimax(curPos, 8, turn)
             print('Number of evaluations: ', evalCalls)
             board.editBoard(suggestedPos)
-            board.printBoard()
+            board.betterPrintBoard()
             turn = -turn
     if board.utility(turn) == 1:
         print("Player 1 wins")
