@@ -188,6 +188,7 @@ class Board:
                         if i + 2 < 8 and j + 2 < 8 and self.board[i+1][j+1] == 2 and self.board[i+2][j+2] == 0:
                             return True
     
+    
     def moveAllowed(self, x, y, direction, turn):
         if (self.board[x][y] == 0):
             return False
@@ -370,6 +371,10 @@ class Board:
                     self.board[x][y] = 0
                     self.board[x-1][y+1] = 0
                     self.promotion()
+                    if(self.availableCapture(turn)):
+                        for i in ['L', 'R', '-L', '-R']:
+                            if self.move(x-2, y+2, i, turn):
+                                return True
                     return True
                 if (self.board[x-1][y+1] == 0):
                     if(self.availableCapture(turn)):
@@ -393,6 +398,10 @@ class Board:
                     self.board[x+2][y-2] = self.board[x][y]
                     self.board[x][y] = 0
                     self.board[x+1][y-1] = 0
+                    if(self.availableCapture(turn)):
+                        for i in ['L', 'R', '-L', '-R']:
+                            if self.move(x+2, y-2, i, turn):
+                                return True
                     return True
                 if (self.board[x+1][y-1] == 0):
                     if(self.availableCapture(turn)):
@@ -415,6 +424,10 @@ class Board:
                     self.board[x+2][y+2] = self.board[x][y]
                     self.board[x][y] = 0
                     self.board[x+1][y+1] = 0
+                    if(self.availableCapture(turn)):
+                        for i in ['L', 'R', '-L', '-R']:
+                            if self.move(x+2, y+2, i, turn):
+                                return True
                     return True
                 if (self.board[x+1][y+1] == 0):
                     if(self.availableCapture(turn)):
@@ -438,6 +451,10 @@ class Board:
                     self.board[x][y] = 0
                     self.board[x+1][y-1] = 0
                     self.promotion()
+                    if(self.availableCapture(turn)):
+                        for i in ['L', 'R', '-L', '-R']:
+                            if self.move(x+2, y-2, i, turn):
+                                return True
                     return True
                 if (self.board[x+1][y-1] == 0):
                     if(self.availableCapture(turn)):
@@ -460,6 +477,10 @@ class Board:
                     self.board[x][y] = 0
                     self.board[x+1][y+1] = 0
                     self.promotion()
+                    if(self.availableCapture(turn)):
+                        for i in ['L', 'R', '-L', '-R']:
+                            if self.move(x+2, y+2, i, turn):
+                                return True
                     return True
                 if (self.board[x+1][y+1] == 0):
                     if(self.availableCapture(turn)):
@@ -483,6 +504,10 @@ class Board:
                     self.board[x-2][y-2] = self.board[x][y]
                     self.board[x][y] = 0
                     self.board[x-1][y-1] = 0
+                    if(self.availableCapture(turn)):
+                        for i in ['L', 'R', '-L', '-R']:
+                            if self.move(x-2, y-2, i, turn):
+                                return True
                     return True
                 if (self.board[x-1][y-1] == 0):
                     if(self.availableCapture(turn)):
@@ -505,6 +530,10 @@ class Board:
                     self.board[x-2][y+2] = self.board[x][y]
                     self.board[x][y] = 0
                     self.board[x-1][y+1] = 0
+                    if(self.availableCapture(turn)):
+                        for i in ['L', 'R', '-L', '-R']:
+                            if self.move(x-2, y+2, i, turn):
+                                return True
                     return True
                 if (self.board[x-1][y+1] == 0):
                     if(self.availableCapture(turn)):
@@ -541,9 +570,55 @@ class Board:
         return True
 #AI
 def learning(str, evaluation, unity=0):
+    learningWeigth = 0.1
     with open('evaluations.txt', 'a') as file:
         file.write(f"{str},{evaluation}\n")
-    pass
+    if unity == 1:
+        #edit the evaluation value of each line, minus by weigth
+        with open('evaluations.txt', 'r') as file:
+            lines = file.readlines()
+            #minus evaluation value by learningWeigth
+            for line in lines:
+                if line.split(',')[0] == str:
+                    evaluation = float(line.split(',')[1]) + learningWeigth
+                    break
+        with open('evaluations.txt', 'w') as file:
+            for line in lines:
+                if line.split(',')[0] == str:
+                    file.write(f"{str},{evaluation}\n")
+                else:
+                    file.write(line)
+    if unity == -1:
+        with open('evaluations.txt', 'r') as file:
+            lines = file.readlines()
+            #minus evaluation value by learningWeigth
+            for line in lines:
+                if line.split(',')[0] == str:
+                    evaluation = float(line.split(',')[1]) - learningWeigth
+                    break
+        with open('evaluations.txt', 'w') as file:
+            for line in lines:
+                if line.split(',')[0] == str:
+                    file.write(f"{str},{evaluation}\n")
+                else:
+                    file.write(line)
+    with open('match.txt', 'a') as file:
+        file.write(f"{str},{evaluation}\n")
+    with open('match.txt', 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            if line.split(',')[0] == str:
+                return
+    with open('match.txt', 'w') as file:
+        for line in lines:
+            if line.split(',')[0] == str:
+                file.write(f"{str},{evaluation}\n")
+            else:
+                file.write(line)
+    # Clear the evaluations file
+    with open('evaluations.txt', 'w') as file:
+        pass
+    
 
 
     
