@@ -4,6 +4,8 @@ import sys
 import math
 import copy
 import string
+import time
+import os
 
 # Board and pieces
 intialPos = '0b0b0b0bb0b0b0b00b0b0b0b0000000000000000w0w0w0w00w0w0w0ww0w0w0w0'
@@ -11,6 +13,7 @@ customPos = '0000000000b00000000b0000000000000w0w0w00000000000000000000000000'
 evalCalls = 0
 
 class Board:
+    lastBoard = [[0 for i in range(8)] for j in range(8)]
     def __init__(self, str):
         self.board = [[0 for i in range(8)] for j in range(8)]
         for i in range(63):
@@ -318,6 +321,7 @@ class Board:
         return False
     
     def move(self, x, y, direction, turn):
+        lastBoard = copy.deepcopy(self.board)
         if (self.board[x][y] == 0):
             return False
         if (turn == 1 and self.board[x][y] < 0):
@@ -531,10 +535,26 @@ class Board:
                 else:
                     print(self.board[i][j], end = '')
             print()
+
+    def undoMove(self):
+        self.board = copy.deepcopy(self.lastBoard)
+        return True
 #AI
+def learning(str, evaluation, unity=0):
+    with open('evaluations.txt', 'a') as file:
+        file.write(f"{str},{evaluation}\n")
+    pass
 
 
-def min_value(str, depth = 10):
+    
+def usingExperience():
+    # Load the file
+    # When the bot is playing, if the string is in the file, use the evaluation
+    # If the string is not in the file, use the minimax algorithm to evaluate the string
+    # Save the string and evaluation to the file
+    pass
+
+def min_value(str, depth = 10, currentV=math.inf):
     tempBoard = Board(str)
     backupBoard = Board(str)
     if depth == 0:
@@ -564,7 +584,7 @@ def min_value(str, depth = 10):
                 tempBoard.board = copy.deepcopy(backupBoard.board)
     return v
 
-def max_value(str, depth = 10):
+def max_value(str, depth = 10, currentV=-math.inf):
     tempBoard = Board(str)
     backupBoard = Board(str)
     if depth == 0:
@@ -578,7 +598,7 @@ def max_value(str, depth = 10):
                 continue
             if tempBoard.moveAllowed(i, j, 'L', 1):
                 tempBoard.move(i, j, 'L', 1)
-                v = max(v, min_value(tempBoard.getString(), depth - 1))
+                v = max(v, min_value(tempBoard.getString(), depth - 1,))
                 tempBoard.board = copy.deepcopy(backupBoard.board)
             if tempBoard.moveAllowed(i, j, 'R', 1):
                 tempBoard.move(i, j, 'R', 1)
@@ -641,7 +661,7 @@ def minimax(str, depth, turn):
                     if(max_value(tempBoard.getString(), depth - 1) < v):
                         v = max_value(tempBoard.getString(), depth - 1)
                         optimalMove = tempBoard.getString()
-                        print(i, j, 'L', -1)
+                        print(i, j, 'L', -1, v)
                     tempBoard.board = copy.deepcopy(backupBoard.board)
                     
                 if tempBoard.moveAllowed(i, j, 'R', -1):
@@ -649,7 +669,7 @@ def minimax(str, depth, turn):
                     if(max_value(tempBoard.getString(), depth - 1) < v):
                         v = max_value(tempBoard.getString(), depth - 1)
                         optimalMove = tempBoard.getString()
-                        print(i, j, 'R', -1)
+                        print(i, j, 'R', -1, v)
                     tempBoard.board = copy.deepcopy(backupBoard.board)
                     
                 if tempBoard.moveAllowed(i, j, '-L', -1):
@@ -657,7 +677,7 @@ def minimax(str, depth, turn):
                     if(max_value(tempBoard.getString(), depth - 1) < v):
                         v = max_value(tempBoard.getString(), depth - 1)
                         optimalMove = tempBoard.getString()
-                        print(i, j, '-L', -1)
+                        print(i, j, '-L', -1, v)
                     tempBoard.board = copy.deepcopy(backupBoard.board)
                     
                 if tempBoard.moveAllowed(i, j, '-R', -1):
@@ -665,10 +685,60 @@ def minimax(str, depth, turn):
                     if(max_value(tempBoard.getString(), depth - 1) < v):
                         v = max_value(tempBoard.getString(), depth - 1)
                         optimalMove = tempBoard.getString()
-                        print(i, j, '-R', -1)
+                        print(i, j, '-R', -1, v)
                     tempBoard.board = copy.deepcopy(backupBoard.board)
     print ('Current evaluation: ' ,v)
     return optimalMove
+
+def tuned_minimax(str, depth, alpha, beta, turn):
+    tempBoard = Board(str)
+    optimalMove = 'N'
+    
+    if depth == 0 or tempBoard.endGame(turn):
+        return evaluate(str), optimalMove
+    
+    if turn == 1:
+        maxEval = -math.inf
+        for i in range(8):
+            for j in range(8):
+                for d in ['L', 'R', '-L', '-R']:
+                    if tempBoard.moveAllowed(i, j, d, 1):
+                        tempBoard.move(i, j, d, 1)
+                        eval, _ = tuned_minimax(tempBoard.getString(), depth - 1, alpha, beta, -1)
+                        if eval > maxEval:
+                            maxEval = eval
+                            optimalMove = tempBoard.getString()
+                        tempBoard.undoMove()
+                        alpha = max(alpha, eval)
+                        if beta <= alpha:
+                            break
+                if beta <= alpha:
+                    break
+            if beta <= alpha:
+                break
+        return maxEval, optimalMove  
+    else:
+        minEval = math.inf
+        for i in range(8):
+            for j in range(8):
+                for d in ['L', 'R', '-L', '-R']:
+                    if tempBoard.moveAllowed(i, j, d, -1):
+                        tempBoard.move(i, j, d, -1)
+                        eval, _ = tuned_minimax(tempBoard.getString(), depth - 1, alpha, beta, 1)
+                        if eval < minEval:
+                            minEval = eval
+                            optimalMove = tempBoard.getString()
+                            print('Depth layer: ', depth, 'Move: ', i, j, d, 'Evaluation: ', eval)
+                        tempBoard.undoMove()
+                        beta = min(beta, eval)
+                        if beta <= alpha:
+                            break
+                if beta <= alpha:
+                    break
+            if beta <= alpha:
+                break
+        print('Depth layer: ', depth, 'Evaluation: ', minEval, 'Move: ', optimalMove)
+        return minEval, optimalMove                   
 
 def evaluate(string):
     global evalCalls
@@ -682,14 +752,17 @@ def evaluate(string):
                 scoreW += board.board[i][j]
             elif board.board[i][j] < 0:
                 scoreB += -board.board[i][j]
-    return round((scoreW) / (scoreB + scoreW),2)
+    return (2*round((scoreW) / (scoreB + scoreW),2) - 1)
 
 def botPlay(str = 'A', difficulty=5, turn=1):
     num_pieces = 64 - str.count('0')
     endGameWeigth = 0.025
-    depth = math.floor(difficulty / (endGameWeigth * num_pieces + 1))
+    depth = math.floor(difficulty / (endGameWeigth * num_pieces + 0.4))
     print ('Depth (bp): ', depth)
-    return minimax(str, depth, turn)
+    eval, mstr = tuned_minimax(str, depth, -math.inf, math.inf, turn)
+    print ('Number of evaluations: ', evalCalls)
+    print ('Evaluation: ', eval)
+    return mstr
     
             
 # play a game
@@ -728,8 +801,11 @@ def playGameBot():
             else:
                 print("Invalid move")
         else:
+            timeStart = time.time()
             curPos = board.getString()
-            suggestedPos = minimax(curPos, 8, turn)
+            suggestedPos = botPlay(curPos, 10, turn)
+            timeEnd = time.time()
+            print('Time to evaluate: ', timeEnd - timeStart)
             print('Number of evaluations: ', evalCalls)
             board.editBoard(suggestedPos)
             board.betterPrintBoard()
@@ -739,8 +815,31 @@ def playGameBot():
     else:
         print("Player 2 wins")
 
+def twoBotGame():
+    board = Board(intialPos)
+    board.betterPrintBoard()
+    turn = 1
+    while not board.endGame(turn):
+        print("Player ", turn, " turn")
+        timeStart = time.time()
+        curPos = board.getString()
+        suggestedPos = botPlay(curPos, 29, turn)
+        timeEnd = time.time()
+        print('Time to evaluate: ', timeEnd - timeStart)
+        print('Number of evaluations: ', evalCalls)
+        board.editBoard(suggestedPos)
+        learning(suggestedPos, evaluate(suggestedPos), 0)
+        board.betterPrintBoard()
+        turn = -turn
+    if board.utility(turn) == 1:
+        print("Player 1 wins")
+        
+    else:
+        print("Player 2 wins")
+
 def main():
-    playGameBot()
+    twoBotGame()
 
 if __name__=="__main__": 
     main()
+    
