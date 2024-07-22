@@ -9,7 +9,7 @@ import os
 
 # Board and pieces
 intialPos = '0b0b0b0bb0b0b0b00b0b0b0b0000000000000000w0w0w0w00w0w0w0ww0w0w0w0'
-customPos = '0000000000b00000000b0000000000000w0w0w00000000000000000000000000' 
+customPos = '0b0b0b0bb0b0b0b00b0b0b000000000000000000w0w0w0w00w0w0w0ww0w0w0w0' 
 evalCalls = 0
 
 class Board:
@@ -188,7 +188,6 @@ class Board:
                         if i + 2 < 8 and j + 2 < 8 and self.board[i+1][j+1] == 2 and self.board[i+2][j+2] == 0:
                             return True
     
-    
     def moveAllowed(self, x, y, direction, turn):
         if (self.board[x][y] == 0):
             return False
@@ -209,8 +208,6 @@ class Board:
                         return False
                     return True
                 if (self.board[x-1][y-1] == 0):
-                    if(self.availableCapture(turn)):
-                        return False
                     return True
             if (direction == 'R'):
                 if(y == 7 or x == 0):
@@ -224,42 +221,36 @@ class Board:
                         return False
                     return True
                 if (self.board[x-1][y+1] == 0):
-                    if(self.availableCapture(turn)):
-                        return False
                     return True
             if (direction == '-L'):
                 if(self.board[x][y] != 2):
                     return False
                 if(y == 0 or x == 7):
                     return False
-                if (self.board[x+1][y-1] < 0):
-                    return False
                 if (self.board[x+1][y-1] > 0):
+                    return False
+                if (self.board[x+1][y-1] < 0):
                     if(x == 6 or y == 1):
                         return False
                     if(self.board[x+2][y-2] != 0):
                         return False
                     return True
                 if (self.board[x+1][y-1] == 0):
-                    if(self.availableCapture(turn)):
-                        return False
                     return True
             if (direction == '-R'):
                 if(self.board[x][y] != 2):
                     return False
                 if(y == 7 or x == 7):
                     return False
-                if (self.board[x+1][y+1] < 0):
-                    return False
                 if (self.board[x+1][y+1] > 0):
+                    return False
+                if (self.board[x+1][y+1] < 0):
                     if(x == 6 or y == 6):
                         return False
                     if(self.board[x+2][y+2] != 0):
                         return False
                     return True
                 if (self.board[x+1][y+1] == 0):
-                    if(self.availableCapture(turn)):
-                        return False
                     return True
         if turn == -1:
             if (direction == 'L'):
@@ -274,8 +265,6 @@ class Board:
                         return False
                     return True
                 if (self.board[x+1][y-1] == 0):
-                    if(self.availableCapture(turn)):
-                        return False
                     return True
             if (direction == 'R'):
                 if(y == 7 or x == 7):
@@ -289,40 +278,40 @@ class Board:
                         return False
                     return True
                 if (self.board[x+1][y+1] == 0):
-                    if(self.availableCapture(turn)):
-                        return False
                     return True
             if (direction == '-L'):
                 if(self.board[x][y] != -2):
                     return False
                 if(y == 0 or x == 0):
                     return False
-                if (self.board[x-1][y-1] > 0):
-                    return False
                 if (self.board[x-1][y-1] < 0):
+                    return False
+                if (self.board[x-1][y-1] > 0):
                     if(x == 1 or y == 1):
                         return False
                     if(self.board[x-2][y-2] != 0):
                         return False
                     return True
                 if (self.board[x-1][y-1] == 0):
-                    if(self.availableCapture(turn)):
-                        return False
                     return True
             if (direction == '-R'):
                 if(self.board[x][y] != -2):
                     return False
                 if(y == 7 or x == 0):
                     return False
-                if (self.board[x-1][y+1] > 0):
-                    return False
                 if (self.board[x-1][y+1] < 0):
+                    return False
+                if (self.board[x-1][y+1] > 0):
                     if(x == 1 or y == 6):
                         return False
+                    if(self.board[x-2][y+2] != 0):
+                        return False
+                    return True
+                if (self.board[x-1][y+1] == 0):
+                    return True
         return False
     
     def move(self, x, y, direction, turn):
-        lastBoard = copy.deepcopy(self.board)
         if (self.board[x][y] == 0):
             return False
         if (turn == 1 and self.board[x][y] < 0):
@@ -388,9 +377,9 @@ class Board:
                     return False
                 if(y == 0 or x == 7):
                     return False
-                if (self.board[x+1][y-1] < 0):
-                    return False
                 if (self.board[x+1][y-1] > 0):
+                    return False
+                if (self.board[x+1][y-1] < 0):
                     if(x == 6 or y == 1):
                         return False
                     if(self.board[x+2][y-2] != 0):
@@ -414,9 +403,9 @@ class Board:
                     return False
                 if(y == 7 or x == 7):
                     return False
-                if (self.board[x+1][y+1] < 0):
-                    return False
                 if (self.board[x+1][y+1] > 0):
+                    return False
+                if (self.board[x+1][y+1] < 0):
                     if(x == 6 or y == 6):
                         return False
                     if(self.board[x+2][y+2] != 0):
@@ -494,9 +483,9 @@ class Board:
                     return False
                 if(y == 0 or x == 0):
                     return False
-                if (self.board[x-1][y-1] > 0):
-                    return False
                 if (self.board[x-1][y-1] < 0):
+                    return False
+                if (self.board[x-1][y-1] > 0):
                     if(x == 1 or y == 1):
                         return False
                     if(self.board[x-2][y-2] != 0):
@@ -520,9 +509,9 @@ class Board:
                     return False
                 if(y == 7 or x == 0):
                     return False
-                if (self.board[x-1][y+1] > 0):
-                    return False
                 if (self.board[x-1][y+1] < 0):
+                    return False
+                if (self.board[x-1][y+1] > 0):
                     if(x == 1 or y == 6):
                         return False
                     if(self.board[x-2][y+2] != 0):
@@ -569,58 +558,6 @@ class Board:
         self.board = copy.deepcopy(self.lastBoard)
         return True
 #AI
-def learning(str, evaluation, unity=0):
-    learningWeigth = 0.1
-    with open('evaluations.txt', 'a') as file:
-        file.write(f"{str},{evaluation}\n")
-    if unity == 1:
-        #edit the evaluation value of each line, minus by weigth
-        with open('evaluations.txt', 'r') as file:
-            lines = file.readlines()
-            #minus evaluation value by learningWeigth
-            for line in lines:
-                if line.split(',')[0] == str:
-                    evaluation = float(line.split(',')[1]) + learningWeigth
-                    break
-        with open('evaluations.txt', 'w') as file:
-            for line in lines:
-                if line.split(',')[0] == str:
-                    file.write(f"{str},{evaluation}\n")
-                else:
-                    file.write(line)
-    if unity == -1:
-        with open('evaluations.txt', 'r') as file:
-            lines = file.readlines()
-            #minus evaluation value by learningWeigth
-            for line in lines:
-                if line.split(',')[0] == str:
-                    evaluation = float(line.split(',')[1]) - learningWeigth
-                    break
-        with open('evaluations.txt', 'w') as file:
-            for line in lines:
-                if line.split(',')[0] == str:
-                    file.write(f"{str},{evaluation}\n")
-                else:
-                    file.write(line)
-    with open('match.txt', 'a') as file:
-        file.write(f"{str},{evaluation}\n")
-    with open('match.txt', 'r') as file:
-        lines = file.readlines()
-        for line in lines:
-            if line.split(',')[0] == str:
-                return
-    with open('match.txt', 'w') as file:
-        for line in lines:
-            if line.split(',')[0] == str:
-                file.write(f"{str},{evaluation}\n")
-            else:
-                file.write(line)
-    # Clear the evaluations file
-    with open('evaluations.txt', 'w') as file:
-        pass
-    
-
-
     
 def usingExperience():
     # Load the file
@@ -842,7 +779,7 @@ def botPlay(str = 'A', difficulty=5, turn=1):
             
 # play a game
 def playGame():
-    board = Board(intialPos)
+    board = Board('0W00000000000000000000000000000000000w00w0w0w00000000000B0000000')
     board.printBoard()
     turn = 1
     while not board.endGame(turn):
@@ -891,7 +828,7 @@ def playGameBot():
         print("Player 2 wins")
 
 def twoBotGame():
-    board = Board(intialPos)
+    board = Board(customPos)
     board.betterPrintBoard()
     turn = 1
     while not board.endGame(turn):
@@ -903,7 +840,6 @@ def twoBotGame():
         print('Time to evaluate: ', timeEnd - timeStart)
         print('Number of evaluations: ', evalCalls)
         board.editBoard(suggestedPos)
-        learning(suggestedPos, evaluate(suggestedPos), 0)
         board.betterPrintBoard()
         turn = -turn
     if board.utility(turn) == 1:
