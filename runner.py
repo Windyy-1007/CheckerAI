@@ -551,9 +551,20 @@ class Board:
                     print(self.board[i][j], end = '')
             print()
 
-    def undoMove(self):
-        self.board = copy.deepcopy(self.lastBoard)
-        return True
+    def listOfSquares(self, turn):
+        # Assign 0 0 as 0 to 7 7 as 63.
+        # Return list of square numbers that are occupied by the player
+        moveList = []
+        for i in range(8):
+            for j in range(8):
+                if turn == 1:
+                    if self.board[i][j] > 0:
+                        moveList.append(i*8 + j)
+                if turn == -1:
+                    if self.board[i][j] < 0:
+                        moveList.append(i*8 + j)
+    
+    
 #AI
     
 def usingExperience():
@@ -709,35 +720,37 @@ def tuned_minimax(str, depth, alpha, beta, turn):
     
     if turn == 1:
         maxEval = -99
-        for i in range(8):
-            for j in range(8):
-                for d in ['L', 'R', '-L', '-R']:
-                    if tempBoard.moveAllowed(i, j, d, 1):
-                        tempBoard.move(i, j, d, 1)
-                        eval, _ = tuned_minimax(tempBoard.getString(), depth - 1, alpha, beta, -1)
-                        if eval > maxEval:
-                            maxEval = eval
-                            optimalMove = tempBoard.getString()
-                        tempBoard.editBoard(originalBoard)
-                        alpha = max(alpha, eval)
-                        if beta <= alpha:
-                            break
+        for sqvalue in [1, 3, 5, 7, 8, 10, 12, 14, 17, 19, 21, 23, 24, 26, 28, 30, 33, 35, 37, 39, 40, 42, 44, 46, 49, 51, 53, 55, 56, 58, 60, 62]:
+            i = sqvalue // 8
+            j = sqvalue % 8
+            for d in ['L', 'R', '-L', '-R']:
+                if tempBoard.moveAllowed(i, j, d, 1):
+                    tempBoard.move(i, j, d, 1)
+                    eval, _ = tuned_minimax(tempBoard.getString(), depth - 1, alpha, beta, -1)
+                    if eval > maxEval:
+                        maxEval = eval
+                        optimalMove = tempBoard.getString()
+                    tempBoard.editBoard(originalBoard)
+                    alpha = max(alpha, eval)
+                    if beta <= alpha:
+                        break
         return maxEval, optimalMove  
     else:
         minEval = 99
-        for i in range(8):
-            for j in range(8):
-                for d in ['L', 'R', '-L', '-R']:
-                    if tempBoard.moveAllowed(i, j, d, -1):
-                        tempBoard.move(i, j, d, -1)
-                        eval, _ = tuned_minimax(tempBoard.getString(), depth - 1, alpha, beta, 1)
-                        if eval < minEval:
-                            minEval = eval
-                            optimalMove = tempBoard.getString()
-                        tempBoard.editBoard(originalBoard)
-                        beta = min(beta, eval)
-                        if beta <= alpha:
-                            break  
+        for sqvalue in [1, 3, 5, 7, 8, 10, 12, 14, 17, 19, 21, 23, 24, 26, 28, 30, 33, 35, 37, 39, 40, 42, 44, 46, 49, 51, 53, 55, 56, 58, 60, 62]:
+            i = sqvalue // 8
+            j = sqvalue % 8
+            for d in ['L', 'R', '-L', '-R']:
+                if tempBoard.moveAllowed(i, j, d, -1):
+                    tempBoard.move(i, j, d, -1)
+                    eval, _ = tuned_minimax(tempBoard.getString(), depth - 1, alpha, beta, 1)
+                    if eval < minEval:
+                        minEval = eval
+                        optimalMove = tempBoard.getString()
+                    tempBoard.editBoard(originalBoard)
+                    beta = min(beta, eval)
+                    if beta <= alpha:
+                        break  
         return minEval, optimalMove
 
 def evaluate(string):
