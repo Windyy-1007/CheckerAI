@@ -152,13 +152,10 @@ class Board:
         if self.moveAvailable(-1):
             return -1
         
-        sum = 0
-        for i in range(8):
-            for j in range(8):
-                sum += self.board[i][j]
-        if sum > 0:
+        res = evaluate(self.getString())
+        if res == 1:
             return 1
-        if sum < 0:
+        if res == -1:
             return -1
         return 0 
     
@@ -704,13 +701,14 @@ def minimax(str, depth, turn):
 
 def tuned_minimax(str, depth, alpha, beta, turn):
     tempBoard = Board(str)
-    optimalMove = 'N'
+    originalBoard = str
+    optimalMove = ''
     
     if depth == 0 or tempBoard.endGame(turn):
         return evaluate(str), optimalMove
     
     if turn == 1:
-        maxEval = -math.inf
+        maxEval = -99
         for i in range(8):
             for j in range(8):
                 for d in ['L', 'R', '-L', '-R']:
@@ -720,17 +718,13 @@ def tuned_minimax(str, depth, alpha, beta, turn):
                         if eval > maxEval:
                             maxEval = eval
                             optimalMove = tempBoard.getString()
-                        tempBoard.undoMove()
+                        tempBoard.editBoard(originalBoard)
                         alpha = max(alpha, eval)
                         if beta <= alpha:
                             break
-                if beta <= alpha:
-                    break
-            if beta <= alpha:
-                break
         return maxEval, optimalMove  
     else:
-        minEval = math.inf
+        minEval = 99
         for i in range(8):
             for j in range(8):
                 for d in ['L', 'R', '-L', '-R']:
@@ -740,17 +734,11 @@ def tuned_minimax(str, depth, alpha, beta, turn):
                         if eval < minEval:
                             minEval = eval
                             optimalMove = tempBoard.getString()
-                            print('Depth layer: ', depth, 'Move: ', i, j, d, 'Evaluation: ', eval)
-                        tempBoard.undoMove()
+                        tempBoard.editBoard(originalBoard)
                         beta = min(beta, eval)
                         if beta <= alpha:
-                            break
-                if beta <= alpha:
-                    break
-            if beta <= alpha:
-                break
-        print('Depth layer: ', depth, 'Evaluation: ', minEval, 'Move: ', optimalMove)
-        return minEval, optimalMove                   
+                            break  
+        return minEval, optimalMove
 
 def evaluate(string):
     global evalCalls
@@ -766,13 +754,16 @@ def evaluate(string):
                 scoreB += -board.board[i][j]
     return (2*round((scoreW) / (scoreB + scoreW),2) - 1)
 
-def botPlay(str = 'A', difficulty=5, turn=1):
-    num_pieces = 64 - str.count('0')
-    endGameWeigth = 0.025
-    depth = math.floor(difficulty / (endGameWeigth * num_pieces + 0.4))
+def botPlay(str = 'A', difficulty=5, turn=1, moves=0, constantDepth = False):
+    if constantDepth:
+        depth = difficulty
+    else:
+        num_pieces = 64 - str.count('0')
+        endGameWeigth = 0.025
+        moveWeigth = 0.1
+        depth = math.floor(difficulty / (endGameWeigth * num_pieces + 0.4) + max(moveWeigth*(moves - 50), 0)) 
     print ('Depth (bp): ', depth)
     eval, mstr = tuned_minimax(str, depth, -math.inf, math.inf, turn)
-    print ('Number of evaluations: ', evalCalls)
     print ('Evaluation: ', eval)
     return mstr
     
@@ -848,8 +839,45 @@ def twoBotGame():
     else:
         print("Player 2 wins")
 
+def oldBotnewBot():
+    board = Board(intialPos)
+    board.betterPrintBoard()
+    turn = 1
+    moves = 0
+    global evalCalls
+    while not board.endGame(turn) and moves < 100:
+        moves += 1
+        print("Player ", turn, " turn")
+        if turn == 1:
+            timeStart = time.time()
+            curPos = board.getString()
+            suggestedPos = minimax(curPos, 5, turn)
+            timeEnd = time.time()
+            print('Time to evaluate: ', timeEnd - timeStart)
+            print('Number of evaluations: ', evalCalls)
+            board.editBoard(suggestedPos)
+            board.betterPrintBoard()
+            turn = -turn
+            evalCalls = 0
+        else:
+            timeStart = time.time()
+            curPos = board.getString()
+            suggestedPos = botPlay(curPos, 6, turn, moves, True)
+            timeEnd = time.time()
+            print('Time to evaluate: ', timeEnd - timeStart)
+            print('Number of evaluations: ', evalCalls)
+            board.editBoard(suggestedPos)
+            board.betterPrintBoard()
+            turn = -turn
+            evalCalls = 0
+            
+    if board.utility(turn) == 1:
+        print("Player 1 wins")
+    else:
+        print("Player 2 wins")    
+
 def main():
-    twoBotGame()
+    oldBotnewBot()
 
 if __name__=="__main__": 
     main()
