@@ -28,6 +28,7 @@ def tuned_minimax(bstr, depth, alpha, beta, turn):
                         if eval > maxEval:
                             maxEval = eval
                             optimalMove = tempBoard.getString()
+                            optD = str(i) + ' ' + str(j) + ' ' + d
                         tempBoard.editBoard(originalBoard)
                         alpha = max(alpha, eval)
                         if beta <= alpha:
@@ -44,12 +45,14 @@ def tuned_minimax(bstr, depth, alpha, beta, turn):
                         if eval < minEval:
                             minEval = eval
                             optimalMove = tempBoard.getString()
-                            optD = str(i) + ' ' + str(j) + ' ' + d
                         tempBoard.editBoard(originalBoard)
                         beta = min(beta, eval)
                         if beta <= alpha:
                             break
         return minEval, optimalMove
+
+def stillInBoard(i, j):
+    return i >= 0 and i < 8 and j >= 0 and j < 8
 
 def evaluate(string):
     global evalCalls
@@ -59,6 +62,7 @@ def evaluate(string):
         return -1
     if board.endGame(-1):
         return 1
+    # Basic evaluation function base on the number of pieces
     scoreW = 0.000
     scoreB = 0.000
     for i in range(8):
@@ -67,6 +71,74 @@ def evaluate(string):
                 scoreW += board.board[i][j]
             elif board.board[i][j] < 0:
                 scoreB += -board.board[i][j]
+    pieceW = scoreW
+    pieceB = scoreB
+    # Heatmap evaluation function
+    # Center heatmap
+    centerW = 0.7
+    promoteLineW = 0.7
+    
+    for i in [3, 4]:
+        for j in [2, 3, 4, 5]:
+            if board.board[i][j] > 0:
+                scoreW += board.board[i][j]*centerW
+            elif board.board[i][j] < 0:
+                scoreB += -board.board[i][j]*centerW
+    
+    # Unpromoted pieces heatmap
+    for j in range(8):
+        if board.board[0][j] == 1:
+            scoreW += board.board[0][j]*promoteLineW
+        if board.board[7][j] == -1:
+            scoreB += -board.board[7][j]*promoteLineW
+
+    # Try to trade pieces when ahead.
+    if pieceW > pieceB:
+        tradeW = 0.5
+        for i in range(8):
+            for j in range(8):
+                if board.board[i][j] < 0:
+                    if stillInBoard(i+1, j+1):
+                        if board.board[i+1][j+1] > 0:
+                            scoreW += board.board[i][j]*tradeW
+                    if stillInBoard(i+1, j-1):
+                        if board.board[i+1][j-1] > 0:
+                            scoreW += board.board[i][j]*tradeW
+                    if stillInBoard(i-1, j+1):
+                        if board.board[i-1][j+1] > 0:
+                            scoreW += board.board[i][j]*tradeW
+                    if stillInBoard(i-1, j-1):
+                        if board.board[i-1][j-1] > 0:
+                            scoreW += board.board[i][j]*tradeW
+    elif pieceW < pieceB:
+        tradeB = 0.5
+        for i in range(8):
+            for j in range(8):
+                if board.board[i][j] > 0:
+                    if stillInBoard(i+1, j+1):
+                        if board.board[i+1][j+1] < 0:
+                            scoreB += -board.board[i][j]*tradeB
+                    if stillInBoard(i+1, j-1):
+                        if board.board[i+1][j-1] < 0:
+                            scoreB += -board.board[i][j]*tradeB
+                    if stillInBoard(i-1, j+1):
+                        if board.board[i-1][j+1] < 0:
+                            scoreB += -board.board[i][j]*tradeB
+                    if stillInBoard(i-1, j-1):
+                        if board.board[i-1][j-1] < 0:
+                            scoreB += -board.board[i][j]*tradeB
+    
+    # Avoid piece islands in openning
+    islandW = 1.5
+    islandB = 1.5
+    openConsideration = 24
+    if pieceW + pieceB > openConsideration:
+        for i in range(8):
+            if not any(board.board[i][j] > 0 for j in range(8)):
+                scoreW -= islandW*((pieceW + pieceB)-openConsideration)/(32-openConsideration)
+            if not any(board.board[i][j] < 0 for j in range(8)):
+                scoreB -= islandB*((pieceW + pieceB)-openConsideration)/(32-openConsideration)
+    
     return round(2*((scoreW) / (scoreB + scoreW)) - 1, 5)
 
 def botPlay(bstr = 'A', difficulty=5, turn=1, moves=0, constantDepth = False):

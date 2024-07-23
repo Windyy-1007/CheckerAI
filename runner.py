@@ -1,13 +1,25 @@
 import board as bd
 import bot as bp
+import minimaxV1 as v1
+import botV2 as bv2
 import time
 
 intialPos = '0b0b0b0bb0b0b0b00b0b0b0b0000000000000000w0w0w0w00w0w0w0ww0w0w0w0'
 customPos = '0b0b0b0bb0b0b0b00b0b0b000000000000000000w0w0w0w00w0w0w0ww0w0w0w0' 
 evalCalls = 0
 
+#To force draw:
+def countPieces(bstr):
+    #Count how many 0 in the string
+    count = 0
+    for i in range(64):
+        if bstr[i] == '0':
+            count += 1
+    return count
+
+
 def playGame():
-    board = bd.Board('0W00000000000000000000000000000000000w00w0w0w00000000000B0000000')
+    board = bd.Board('000b0b0b0000b0b00b0b000bb000b000000w0w000000w0000w0b0w0ww0w0w0w0')
     board.printBoard()
     turn = 1
     while not board.endGame(turn):
@@ -81,13 +93,13 @@ def oldBotnewBot():
     turn = 1
     moves = 0
     global evalCalls
-    while not board.endGame(turn) and moves < 1000:
-        moves += 1
+    while not board.endGame(turn) and moves < 51:
+        cp1 = countPieces(board.getString())
         print("Player ", turn, " turn")
         if turn == 1:
             timeStart = time.time()
             curPos = board.getString()
-            suggestedPos = bp.minimax(curPos, 5, turn)
+            suggestedPos = bv2.botPlay(curPos, 6, turn, moves, True)
             timeEnd = time.time()
             print('Time to evaluate: ', timeEnd - timeStart)
             board.editBoard(suggestedPos)
@@ -97,13 +109,18 @@ def oldBotnewBot():
         else:
             timeStart = time.time()
             curPos = board.getString()
-            suggestedPos = bp.botPlay(curPos, 5, turn, moves, False)
+            suggestedPos = bp.botPlay(curPos, 6, turn, moves, True)
             timeEnd = time.time()
             print('Time to evaluate: ', timeEnd - timeStart)
             board.editBoard(suggestedPos)
             board.betterPrintBoard()
             turn = -turn
             evalCalls = 0
+        cp2 = countPieces(board.getString())
+        if cp1 == cp2:
+            moves += 1
+        else:
+            moves = 0
             
     if board.utility(turn) == 1:
         print("Player 1 wins")
@@ -111,7 +128,7 @@ def oldBotnewBot():
         print("Player 2 wins")    
 
 def main():
-    twoBotGame()
+    oldBotnewBot()
 
 if __name__=="__main__": 
     main()

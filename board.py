@@ -111,12 +111,13 @@ class Board:
                 if(self.board[i][j] < 0):
                     sum += 1
         if sum == 0:
-            winner = 1
             return True
         
         if not self.moveAvailable(turn):
             return True
-                    
+        
+        
+        
         return False
 
     def moveAvailable(self, turn):
@@ -147,17 +148,25 @@ class Board:
     def utility(self, turn):
         if not self.endGame(turn):
             return 0
-        if self.moveAvailable(1):
-            return 1
-        if self.moveAvailable(-1):
+        if not self.moveAvailable(1):
             return -1
+        if not self.moveAvailable(-1):
+            return 1
         
-        res = evaluate(self.getString())
-        if res == 1:
-            return 1
-        if res == -1:
+        countWhite = 0
+        countBlack = 0
+        for i in range(8):
+            for j in range(8):
+                if self.board[i][j] > 0:
+                    countWhite += 1
+                if self.board[i][j] < 0:
+                    countBlack += 1
+        if countWhite == 0:
             return -1
-        return 0 
+        if countBlack == 0:
+            return 1
+        
+        return 0
     
     def availableCapture(self, turn):
         if turn == 1:
@@ -204,7 +213,7 @@ class Board:
                     if(self.board[x-2][y-2] != 0):
                         return False
                     return True
-                if (self.board[x-1][y-1] == 0):
+                if (self.board[x-1][y-1] == 0 and not self.availableCapture(turn)):
                     return True
             if (direction == 'R'):
                 if(y == 7 or x == 0):
@@ -217,7 +226,7 @@ class Board:
                     if(self.board[x-2][y+2] != 0):
                         return False
                     return True
-                if (self.board[x-1][y+1] == 0):
+                if (self.board[x-1][y+1] == 0 and not self.availableCapture(turn)):
                     return True
             if (direction == '-L'):
                 if(self.board[x][y] != 2):
@@ -232,7 +241,7 @@ class Board:
                     if(self.board[x+2][y-2] != 0):
                         return False
                     return True
-                if (self.board[x+1][y-1] == 0):
+                if (self.board[x+1][y-1] == 0 and not self.availableCapture(turn)):
                     return True
             if (direction == '-R'):
                 if(self.board[x][y] != 2):
@@ -247,7 +256,7 @@ class Board:
                     if(self.board[x+2][y+2] != 0):
                         return False
                     return True
-                if (self.board[x+1][y+1] == 0):
+                if (self.board[x+1][y+1] == 0 and not self.availableCapture(turn)):
                     return True
         if turn == -1:
             if (direction == 'L'):
@@ -261,7 +270,7 @@ class Board:
                     if(self.board[x+2][y-2] != 0):
                         return False
                     return True
-                if (self.board[x+1][y-1] == 0):
+                if (self.board[x+1][y-1] == 0 and not self.availableCapture(turn)):
                     return True
             if (direction == 'R'):
                 if(y == 7 or x == 7):
@@ -274,7 +283,7 @@ class Board:
                     if(self.board[x+2][y+2] != 0):
                         return False
                     return True
-                if (self.board[x+1][y+1] == 0):
+                if (self.board[x+1][y+1] == 0 and not self.availableCapture(turn)):
                     return True
             if (direction == '-L'):
                 if(self.board[x][y] != -2):
@@ -289,7 +298,7 @@ class Board:
                     if(self.board[x-2][y-2] != 0):
                         return False
                     return True
-                if (self.board[x-1][y-1] == 0):
+                if (self.board[x-1][y-1] == 0 and not self.availableCapture(turn)):
                     return True
             if (direction == '-R'):
                 if(self.board[x][y] != -2):
@@ -304,7 +313,7 @@ class Board:
                     if(self.board[x-2][y+2] != 0):
                         return False
                     return True
-                if (self.board[x-1][y+1] == 0):
+                if (self.board[x-1][y+1] == 0 and not self.availableCapture(turn)):
                     return True
         return False
     
@@ -564,5 +573,4 @@ class Board:
                     if self.board[i][j] < 0:
                         moveList.append(i*8 + j)
     
-    
-#AI
+
