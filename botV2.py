@@ -76,7 +76,7 @@ def evaluate(string):
     # Heatmap evaluation function
     # Center heatmap
     centerW = 0.7
-    promoteLineW = 0.7
+    promoteLineW = 0.5
     
     for i in [3, 4]:
         for j in [2, 3, 4, 5]:
@@ -87,14 +87,14 @@ def evaluate(string):
     
     # Unpromoted pieces heatmap
     for j in range(8):
-        if board.board[0][j] == 1:
+        if board.board[7][j] == 1:
             scoreW += board.board[0][j]*promoteLineW
-        if board.board[7][j] == -1:
+        if board.board[0][j] == -1:
             scoreB += -board.board[7][j]*promoteLineW
 
     # Try to trade pieces when ahead.
     if pieceW > pieceB:
-        tradeW = 0.5
+        tradeW = min(0.5*(pieceW/pieceB),0.95)
         for i in range(8):
             for j in range(8):
                 if board.board[i][j] < 0:
@@ -110,8 +110,33 @@ def evaluate(string):
                     if stillInBoard(i-1, j-1):
                         if board.board[i-1][j-1] > 0:
                             scoreW += board.board[i][j]*tradeW
+                    if stillInBoard(i, j+2):
+                        if board.board[i][j+2] > 0:
+                            scoreW += board.board[i][j]*tradeW*0.5
+                    if stillInBoard(i, j-2):
+                        if board.board[i][j-2] > 0:
+                            scoreW += board.board[i][j]*tradeW*0.5
+                    if stillInBoard(i+2, j):
+                        if board.board[i+2][j] > 0:
+                            scoreW += board.board[i][j]*tradeW*0.5
+                    if stillInBoard(i-2, j):
+                        if board.board[i-2][j] > 0:
+                            scoreW += board.board[i][j]*tradeW*0.5
+                    if stillInBoard(i+2, j+2):
+                        if board.board[i+2][j+2] > 0:
+                            scoreW += board.board[i][j]*tradeW*0.5
+                    if stillInBoard(i+2, j-2):
+                        if board.board[i+2][j-2] > 0:
+                            scoreW += board.board[i][j]*tradeW*0.5
+                    if stillInBoard(i-2, j+2):
+                        if board.board[i-2][j+2] > 0:
+                            scoreW += board.board[i][j]*tradeW*0.5
+                    if stillInBoard(i-2, j-2):
+                        if board.board[i-2][j-2] > 0:
+                            scoreW += board.board[i][j]*tradeW*0.5
+                            
     elif pieceW < pieceB:
-        tradeB = 0.5
+        tradeB = min(0.5*(pieceB/pieceW),0.95)
         for i in range(8):
             for j in range(8):
                 if board.board[i][j] > 0:
@@ -127,6 +152,32 @@ def evaluate(string):
                     if stillInBoard(i-1, j-1):
                         if board.board[i-1][j-1] < 0:
                             scoreB += -board.board[i][j]*tradeB
+                    if stillInBoard(i, j+2):
+                        if board.board[i][j+2] < 0:
+                            scoreB += -board.board[i][j]*tradeB*0.5
+                    if stillInBoard(i, j-2):
+                        if board.board[i][j-2] < 0:
+                            scoreB += -board.board[i][j]*tradeB*0.5
+                    if stillInBoard(i+2, j):
+                        if board.board[i+2][j] < 0:
+                            scoreB += -board.board[i][j]*tradeB*0.5
+                    if stillInBoard(i-2, j):
+                        if board.board[i-2][j] < 0:
+                            scoreB += -board.board[i][j]*tradeB*0.5
+                    if stillInBoard(i+2, j+2):
+                        if board.board[i+2][j+2] < 0:
+                            scoreB += -board.board[i][j]*tradeB*0.5
+                    if stillInBoard(i+2, j-2):
+                        if board.board[i+2][j-2] < 0:
+                            scoreB += -board.board[i][j]*tradeB*0.5
+                    if stillInBoard(i-2, j+2):
+                        if board.board[i-2][j+2] < 0:
+                            scoreB += -board.board[i][j]*tradeB*0.5
+                    if stillInBoard(i-2, j-2):
+                        if board.board[i-2][j-2] < 0:
+                            scoreB += -board.board[i][j]*tradeB*0.5
+
+                        
     
     # Avoid piece islands in openning
     islandW = 1.5

@@ -12,6 +12,7 @@ SQUARE_SIZE = WIDTH // 8
 RADIUS = SQUARE_SIZE // 2 - 5
 WHITE = (255, 255, 255)
 WHITEGREEN = (239, 255, 251)
+WHITERED = (255, 164, 164)
 BLACK = (0, 0, 0)
 GREY = (128, 128, 128)
 BLUE = (0, 0, 255)
@@ -101,8 +102,8 @@ def drawPieces(bstr):
             
 
 def main():
-    MODE = 0
-    DEPTH = 5
+    MODE = 1
+    DEPTH = 7
     # Mode = 0: Play game angainst bot
     # Mode = 1: Two bots play against each other
     # Depth = 6 take on average 1.5 seconds to run a move
@@ -145,6 +146,19 @@ def main():
                                 print('From: ', x, y)
                                 drawBoard(board.getString())
                                 pygame.draw.rect(SCREEN, RED, (x * SQUARE_SIZE, y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                                # Highlight allowed moves
+                                for d in ['L', 'R', '-L', '-R']:
+                                    if board.moveAllowed(y, x, d, turn):
+                                        move_x = x
+                                        move_y = y
+                                        if d == 'L':
+                                            pygame.draw.rect(SCREEN, WHITERED, ((move_x - 1) * SQUARE_SIZE, (move_y - 1) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                                        elif d == 'R':
+                                            pygame.draw.rect(SCREEN, WHITERED, ((move_x + 1) * SQUARE_SIZE, (move_y - 1) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                                        elif d == '-L':
+                                            pygame.draw.rect(SCREEN, WHITERED, ((move_x - 1) * SQUARE_SIZE, (move_y + 1) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                                        elif d == '-R':
+                                            pygame.draw.rect(SCREEN, WHITERED, ((move_x + 1) * SQUARE_SIZE, (move_y + 1) * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
                                 drawPieces(board.getString())
                                 pygame.display.update()
                             else:
@@ -168,7 +182,12 @@ def main():
                                         drawPieces(board.getString())
                                         pygame.display.update()
                                     else:
-                                        print("Invalid move", x, y, direction)                                    
+                                        print("Invalid move", x, y, direction)
+                                        drawBoard(board.getString())
+                                        drawPieces(board.getString())
+                                        x = -1
+                                        y = -1
+                                        pygame.display.update()                                    
                                 x = -1
                                 y = -1
                                 direction = ''
@@ -182,7 +201,7 @@ def main():
                         run = False
                 timeStart = time.time()
                 curPos = board.getString()
-                suggestedPos = bp.botPlay(curPos, DEPTH, turn, 0, True)
+                suggestedPos = bv2.botPlay(curPos, DEPTH, turn, 0, True)
                 timeEnd = time.time()
                 print('Time to evaluate: ', timeEnd - timeStart)
                 print('Number of evaluations: ', evalCalls)
@@ -219,7 +238,7 @@ def main():
                         run = False
                 timeStart = time.time()
                 curPos = board.getString()
-                suggestedPos = bp.botPlay(curPos, DEPTH, turn, 0, True)
+                suggestedPos = bv2.botPlay(curPos, DEPTH, turn, 0, True)
                 timeEnd = time.time()
                 print('Time to evaluate: ', timeEnd - timeStart)
                 print('Number of evaluations: ', evalCalls)

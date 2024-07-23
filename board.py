@@ -76,7 +76,7 @@ class Board:
             print()
     
     def editBoard(self, str):
-        for i in range(63):
+        for i in range(64):
             if str[i] == 'N':
                 break
             row = i // 8
