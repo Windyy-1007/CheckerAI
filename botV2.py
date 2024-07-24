@@ -73,10 +73,11 @@ def evaluate(string):
                 scoreB += -board.board[i][j]
     pieceW = scoreW
     pieceB = scoreB
+    """
     # Heatmap evaluation function
     # Center heatmap
-    centerW = 0.7
-    promoteLineW = 0.5
+    centerW = 0.5
+    promoteLineW = 0.3
     
     for i in [3, 4]:
         for j in [2, 3, 4, 5]:
@@ -92,9 +93,11 @@ def evaluate(string):
         if board.board[0][j] == -1:
             scoreB += -board.board[7][j]*promoteLineW
 
+    """
+    
     # Try to trade pieces when ahead.
     if pieceW > pieceB:
-        tradeW = min(0.5*(pieceW/pieceB),0.95)
+        tradeW = max(0.3*(pieceW+pieceB-20),0)
         for i in range(8):
             for j in range(8):
                 if board.board[i][j] < 0:
@@ -136,7 +139,7 @@ def evaluate(string):
                             scoreW += board.board[i][j]*tradeW*0.5
                             
     elif pieceW < pieceB:
-        tradeB = min(0.5*(pieceB/pieceW),0.95)
+        tradeB = max(0.3*(pieceB+pieceW-20),0)
         for i in range(8):
             for j in range(8):
                 if board.board[i][j] > 0:
@@ -178,10 +181,10 @@ def evaluate(string):
                             scoreB += -board.board[i][j]*tradeB*0.5
 
                         
-    
+    """
     # Avoid piece islands in openning
-    islandW = 1.5
-    islandB = 1.5
+    islandW = 1
+    islandB = 1
     openConsideration = 24
     if pieceW + pieceB > openConsideration:
         for i in range(8):
@@ -189,7 +192,7 @@ def evaluate(string):
                 scoreW -= islandW*((pieceW + pieceB)-openConsideration)/(32-openConsideration)
             if not any(board.board[i][j] < 0 for j in range(8)):
                 scoreB -= islandB*((pieceW + pieceB)-openConsideration)/(32-openConsideration)
-    
+    """
     return round(2*((scoreW) / (scoreB + scoreW)) - 1, 5)
 
 def botPlay(bstr = 'A', difficulty=5, turn=1, moves=0, constantDepth = False):
@@ -220,6 +223,9 @@ def botPlay(bstr = 'A', difficulty=5, turn=1, moves=0, constantDepth = False):
     with open('dict6.txt', 'a') as file:
         file.write(bstr + ',' + mstr + ',' + str(eval) + '\n')
     print ('Evaluation: ', eval)
+    global evalCalls
+    print ('Number of calculated positions: ', evalCalls)
+    evalCalls = 0
     return mstr
     
     

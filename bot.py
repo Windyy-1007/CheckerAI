@@ -97,6 +97,9 @@ def botPlay(bstr = 'A', difficulty=5, turn=1, moves=0, constantDepth = False):
     with open('dict6.txt', 'a') as file:
         file.write(bstr + ',' + mstr + ',' + str(eval) + '\n')
     print ('Evaluation: ', eval)
+    global evalCalls
+    print ('Number of calculated positions: ', evalCalls)
+    evalCalls = 0
     return mstr
     
     

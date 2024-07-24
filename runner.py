@@ -24,7 +24,7 @@ SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 
 
 intialPos = '0b0b0b0bb0b0b0b00b0b0b0b0000000000000000w0w0w0w00w0w0w0ww0w0w0w0'
-customPos = '0b0b0b0bb0b0b0b00b0b0b000000000000000000w0w0w0w00w0w0w0ww0w0w0w0' 
+customPos = '000000000000000000000000000000000B000B0B000000000B0w000w000000W0' 
 evalCalls = 0
 
 #To force draw:
@@ -103,12 +103,15 @@ def drawPieces(bstr):
 
 def main():
     MODE = 1
-    DEPTH = 7
+    DEPTH = 2
+    DEPTH1 = 5
+    DEPTH2 = 7
     # Mode = 0: Play game angainst bot
     # Mode = 1: Two bots play against each other
     # Depth = 6 take on average 1.5 seconds to run a move
     # Depth = 8 take roughly 15 seconds to run a move
-    # Depth = 10 take roughly 2 minutes to run a move
+    # Depth = 10 take roughly 2 minutes to run a move, only use to solve puzzles
+    BOT_DELAY = 1000
     
     pygame.init()
     run = True
@@ -119,7 +122,7 @@ def main():
     y2 = -1
     direction = ''
     turn = 1
-    board = bd.Board(intialPos)
+    board = bd.Board(customPos)
     pygame.display.set_caption('Checkers')
     pygame.display.set_icon(pygame.image.load('icon.png'))
     drawBoard(board.getString())
@@ -128,7 +131,7 @@ def main():
     if MODE == 0:
         while run:
             clock.tick(60)
-            if turn == 1:
+            if turn == 1 and not board.endGame(turn):
                 SCREEN.fill(WHITE)
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -194,7 +197,7 @@ def main():
                                 print('To: ', x2, y2)
                                 break
                 SCREEN.fill(WHITE)
-            else:
+            elif turn == -1 and not board.endGame(turn):
                 print("Player ", turn, " turn")
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -211,10 +214,16 @@ def main():
                 drawBoard(board.getString())
                 drawPieces(board.getString())
                 pygame.display.update()
-        if board.utility(turn) == 1:
-            print("Player 1 wins")
-        else:
-            print("Player 2 wins")
+            elif board.utility(turn) == 1:
+                print("Player 1 wins")
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        run = False
+            else:
+                print("Player 2 wins")
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        run = False
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -226,8 +235,10 @@ def main():
     if MODE == 1:
         while run:
             clock.tick(60)
+            #Delay each move by 2 seconds
+            pygame.time.delay(BOT_DELAY)
             
-            if turn == 1:
+            if turn == 1 and not board.endGame(turn):
                 SCREEN.fill(WHITE)
                 drawBoard(board.getString())
                 drawPieces(board.getString())
@@ -238,37 +249,36 @@ def main():
                         run = False
                 timeStart = time.time()
                 curPos = board.getString()
-                suggestedPos = bv2.botPlay(curPos, DEPTH, turn, 0, True)
+                suggestedPos = bp.botPlay(curPos, DEPTH1, turn, 0, True)
                 timeEnd = time.time()
                 print('Time to evaluate: ', timeEnd - timeStart)
-                print('Number of evaluations: ', evalCalls)
                 board.editBoard(suggestedPos)
                 turn = -turn
                 SCREEN.fill(WHITE)
                 drawBoard(board.getString())
                 drawPieces(board.getString())
                 pygame.display.update()
-            else:
+            elif turn == -1 and not board.endGame(turn):
                 print("Player ", turn, " turn")
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT: 
                         run = False
                 timeStart = time.time()
                 curPos = board.getString()
-                suggestedPos = bp.botPlay(curPos, DEPTH, turn, 0, True)
+                suggestedPos = bp.botPlay(curPos, DEPTH2, turn, 0, True)
                 timeEnd = time.time()
                 print('Time to evaluate: ', timeEnd - timeStart)
-                print('Number of evaluations: ', evalCalls)
                 board.editBoard(suggestedPos)
                 turn = -turn
                 SCREEN.fill(WHITE)
                 drawBoard(board.getString())
                 drawPieces(board.getString())
                 pygame.display.update()
-        if board.utility(turn) == 1:
-            print("Player 1 wins")
-        else:
-            print("Player 2 wins")
+            if board.endGame(turn):
+                if board.utility(turn) == 1:
+                    print("Player 1 wins")
+                else:
+                    print("Player 2 wins")
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

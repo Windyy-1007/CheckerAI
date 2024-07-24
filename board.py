@@ -103,7 +103,7 @@ class Board:
                 if(self.board[i][j] > 0):
                     sum += 1
         if sum == 0:
-            winner = -1
+            print ("Win by no pieces left")
             return True
         sum = 0
         for i in range(8):
@@ -111,13 +111,12 @@ class Board:
                 if(self.board[i][j] < 0):
                     sum += 1
         if sum == 0:
+            print ("Win by no pieces left")
             return True
         
         if not self.moveAvailable(turn):
+            print ("Win by no moves left")
             return True
-        
-        
-        
         return False
 
     def moveAvailable(self, turn):
@@ -143,6 +142,7 @@ class Board:
                             return True
                         if self.moveAllowed(i, j, '-R', turn):
                             return True
+        
         return False
  
     def utility(self, turn):
@@ -181,6 +181,24 @@ class Board:
                             return True
                         if i - 2 >= 0 and j + 2 < 8 and self.board[i-1][j+1] == -2 and self.board[i-2][j+2] == 0:
                             return True
+                    if self.board[i][j] == 2:
+                        if i - 2 >= 0 and j - 2 >= 0 and self.board[i-1][j-1] == -1 and self.board[i-2][j-2] == 0:
+                            return True
+                        if i - 2 >= 0 and j + 2 < 8 and self.board[i-1][j+1] == -1 and self.board[i-2][j+2] == 0:
+                            return True
+                        if i - 2 >= 0 and j - 2 >= 0 and self.board[i-1][j-1] == -2 and self.board[i-2][j-2] == 0:
+                            return True
+                        if i - 2 >= 0 and j + 2 < 8 and self.board[i-1][j+1] == -2 and self.board[i-2][j+2] == 0:
+                            return True
+                        if i + 2 < 8 and j - 2 >= 0 and self.board[i+1][j-1] == -1 and self.board[i+2][j-2] == 0:
+                            return True
+                        if i + 2 < 8 and j + 2 < 8 and self.board[i+1][j+1] == -1 and self.board[i+2][j+2] == 0:
+                            return True
+                        if i + 2 < 8 and j - 2 >= 0 and self.board[i+1][j-1] == -2 and self.board[i+2][j-2] == 0:
+                            return True
+                        if i + 2 < 8 and j + 2 < 8 and self.board[i+1][j+1] == -2 and self.board[i+2][j+2] == 0:
+                            return True
+                        
         if turn == -1:
             for i in range(8):
                 for j in range(8):
@@ -193,6 +211,24 @@ class Board:
                             return True
                         if i + 2 < 8 and j + 2 < 8 and self.board[i+1][j+1] == 2 and self.board[i+2][j+2] == 0:
                             return True
+                    if self.board[i][j] == -2:
+                        if i + 2 < 8 and j - 2 >= 0 and self.board[i+1][j-1] == 1 and self.board[i+2][j-2] == 0:
+                            return True
+                        if i + 2 < 8 and j + 2 < 8 and self.board[i+1][j+1] == 1 and self.board[i+2][j+2] == 0:
+                            return True
+                        if i + 2 < 8 and j - 2 >= 0 and self.board[i+1][j-1] == 2 and self.board[i+2][j-2] == 0:
+                            return True
+                        if i + 2 < 8 and j + 2 < 8 and self.board[i+1][j+1] == 2 and self.board[i+2][j+2] == 0:
+                            return True
+                        if i - 2 >= 0 and j - 2 >= 0 and self.board[i-1][j-1] == 1 and self.board[i-2][j-2] == 0:
+                            return True
+                        if i - 2 >= 0 and j + 2 < 8 and self.board[i-1][j+1] == 1 and self.board[i-2][j+2] == 0:
+                            return True
+                        if i - 2 >= 0 and j - 2 >= 0 and self.board[i-1][j-1] == 2 and self.board[i-2][j-2] == 0:
+                            return True
+                        if i - 2 >= 0 and j + 2 < 8 and self.board[i-1][j+1] == 2 and self.board[i-2][j+2] == 0:
+                            return True                    
+        return False
     
     def moveAllowed(self, x, y, direction, turn):
         if (self.board[x][y] == 0):
