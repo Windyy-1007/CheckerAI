@@ -12,6 +12,7 @@ def tuned_minimax(bstr, depth, alpha, beta, turn):
     optD = ''
     
     if tempBoard.endGame(turn):
+        print ('End game:' , optimalMove)
         return tempBoard.utility(turn), optimalMove
     
     if depth == 0:

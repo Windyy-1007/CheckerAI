@@ -24,7 +24,7 @@ SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 
 
 intialPos = '0b0b0b0bb0b0b0b00b0b0b0b0000000000000000w0w0w0w00w0w0w0ww0w0w0w0'
-customPos = '000000000000000000000000000000000B000B0B000000000B0w000w000000W0' 
+customPos = intialPos 
 evalCalls = 0
 
 #To force draw:
@@ -102,19 +102,20 @@ def drawPieces(bstr):
             
 
 def main():
-    MODE = 1
-    DEPTH = 2
-    DEPTH1 = 5
-    DEPTH2 = 7
+    MODE = 0
+    DEPTH = 6
+    DEPTH1 = 1
+    DEPTH2 = 6
     # Mode = 0: Play game angainst bot
     # Mode = 1: Two bots play against each other
     # Depth = 6 take on average 1.5 seconds to run a move
     # Depth = 8 take roughly 15 seconds to run a move
     # Depth = 10 take roughly 2 minutes to run a move, only use to solve puzzles
-    BOT_DELAY = 1000
+    BOT_DELAY = 0
     
     pygame.init()
     run = True
+    event2 = True
     clock = pygame.time.Clock()
     x = -1
     y = -1
@@ -204,7 +205,7 @@ def main():
                         run = False
                 timeStart = time.time()
                 curPos = board.getString()
-                suggestedPos = bv2.botPlay(curPos, DEPTH, turn, 0, True)
+                suggestedPos = bp.botPlay(curPos, DEPTH, turn, 0, True)
                 timeEnd = time.time()
                 print('Time to evaluate: ', timeEnd - timeStart)
                 print('Number of evaluations: ', evalCalls)
@@ -216,22 +217,21 @@ def main():
                 pygame.display.update()
             elif board.utility(turn) == 1:
                 print("Player 1 wins")
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        run = False
+                MODE = 2
+                run = False
+                run2 = True
+                    
             else:
                 print("Player 2 wins")
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        run = False
+                MODE = 2
+                run = False
+                run2 = True
         
         for event in pygame.event.get():
+            
             if event.type == pygame.QUIT:
                 run = False
-                
 
-        pygame.display.update()
-        pygame.quit()
     if MODE == 1:
         while run:
             clock.tick(60)
@@ -277,16 +277,25 @@ def main():
             if board.endGame(turn):
                 if board.utility(turn) == 1:
                     print("Player 1 wins")
+                    MODE = 2
+                    run = False
+                    run2 = True
                 else:
                     print("Player 2 wins")
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-                
-
-        pygame.display.update()
-        pygame.quit()            
+                    MODE = 2
+                    run = False
+                    run2 = True
+    if MODE == 2:
+        while run2:
+            SCREEN.fill(WHITE)
+            drawBoard(board.getString())
+            drawPieces(board.getString())
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run2 = False    
+    
+    
+    pygame.quit()            
 if __name__=="__main__": 
     main()
     
