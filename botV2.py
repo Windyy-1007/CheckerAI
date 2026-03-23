@@ -203,24 +203,8 @@ def botPlay(bstr = 'A', difficulty=5, turn=1, moves=0, constantDepth = False):
         moveWeigth = 0.1
         depth = math.floor(difficulty / (endGameWeigth * num_pieces + 0.4) + max(moveWeigth*(moves - 50), 0)) 
     print ('Depth (bp): ', depth)
-    
-    
-    """
-    with open('dict6.txt', 'r') as file:
-        # Each line will have 3 values: str, mstr, eval
-        for line in file:
-            if bstr == line.split()[0]:
-                eval = line.split()[2]
-                print ('Evaluation: ', eval)
-                return line.split()[1]
-    
-    """
             
     eval, mstr = tuned_minimax(bstr, depth, -math.inf, math.inf, turn)
-    # Add str, msr, eval to the file
-    # Turn evaluation to string
-    with open('dict6.txt', 'a') as file:
-        file.write(bstr + ',' + mstr + ',' + str(eval) + '\n')
     print ('Evaluation: ', eval)
     global evalCalls
     print ('Number of calculated positions: ', evalCalls)

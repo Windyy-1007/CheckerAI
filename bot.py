@@ -140,7 +140,7 @@ def boosted_depth_for_endgame(bstr, turn, depth):
     if pieces <= 12 and ahead:
         bonus += 2
 
-    return min(depth + bonus, 14)
+    return min(depth + bonus, 20)
 
 def botPlay(bstr = 'A', difficulty=5, turn=1, moves=0, constantDepth = False):
     transposition_table.clear()
@@ -153,24 +153,8 @@ def botPlay(bstr = 'A', difficulty=5, turn=1, moves=0, constantDepth = False):
         depth = math.floor(difficulty / (endGameWeigth * num_pieces + 0.4) + max(moveWeigth*(moves - 50), 0)) 
     boosted_depth = boosted_depth_for_endgame(bstr, turn, depth)
     print ('Depth (bp): ', depth, '->', boosted_depth)
-    
-    
-    """
-    with open('dict6.txt', 'r') as file:
-        # Each line will have 3 values: str, mstr, eval
-        for line in file:
-            if bstr == line.split()[0]:
-                eval = line.split()[2]
-                print ('Evaluation: ', eval)
-                return line.split()[1]
-    
-    """
             
     eval, mstr = tuned_minimax(bstr, boosted_depth, -math.inf, math.inf, turn)
-    # Add str, msr, eval to the file
-    # Turn evaluation to string
-    with open('dict6.txt', 'a') as file:
-        file.write(bstr + ',' + mstr + ',' + str(eval) + '\n')
     print ('Evaluation: ', eval)
     global evalCalls
     print ('Number of calculated positions: ', evalCalls)
