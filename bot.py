@@ -4,52 +4,86 @@ import math
 import copy
 
 evalCalls = 0
+transposition_table = {}
+
+
+def quick_material_score(bstr):
+    return bstr.count('w') + 2 * bstr.count('W') - bstr.count('b') - 2 * bstr.count('B')
+
+
+def generate_ordered_moves(tempBoard, originalBoard, turn):
+    moves = []
+    original_zeros = originalBoard.count('0')
+
+    for i in range(8):
+        for j in range(8):
+            for d in ['L', 'R', '-L', '-R']:
+                if tempBoard.moveAllowed(i, j, d, turn):
+                    tempBoard.move(i, j, d, turn)
+                    next_bstr = tempBoard.getString()
+                    tempBoard.editBoard(originalBoard)
+
+                    capture_score = next_bstr.count('0') - original_zeros
+                    material_score = quick_material_score(next_bstr)
+                    if turn == -1:
+                        material_score = -material_score
+
+                    moves.append((capture_score, material_score, next_bstr))
+
+    moves.sort(key=lambda item: (item[0], item[1]), reverse=True)
+    return [item[2] for item in moves]
 
 def tuned_minimax(bstr, depth, alpha, beta, turn):
+    key = (bstr, depth, turn)
+    if key in transposition_table:
+        return transposition_table[key]
+
     tempBoard = bd.Board(bstr)
     originalBoard = bstr
     optimalMove = ''
     
     if tempBoard.endGame(turn):
-        print ('End game:' , optimalMove)
-        return tempBoard.utility(turn), optimalMove
+        result = (tempBoard.utility(turn), optimalMove)
+        transposition_table[key] = result
+        return result
     
     if depth == 0:
-        return evaluate(bstr), optimalMove
+        result = (evaluate(bstr), optimalMove)
+        transposition_table[key] = result
+        return result
+
+    legal_moves = generate_ordered_moves(tempBoard, originalBoard, turn)
+    if not legal_moves:
+        result = (tempBoard.utility(turn), optimalMove)
+        transposition_table[key] = result
+        return result
     
     if turn == 1:
         maxEval = -99
-        for i in range(8):
-            for j in range(8):
-                for d in ['L', 'R', '-L', '-R']:
-                    if tempBoard.moveAllowed(i, j, d, 1):
-                        tempBoard.move(i, j, d, 1)
-                        eval, _ = tuned_minimax(tempBoard.getString(), depth - 1, alpha, beta, -1)
-                        if eval > maxEval:
-                            maxEval = eval
-                            optimalMove = tempBoard.getString()
-                        tempBoard.editBoard(originalBoard)
-                        alpha = max(alpha, eval)
-                        if beta <= alpha:
-                            break
-        return maxEval, optimalMove  
+        for next_bstr in legal_moves:
+            eval, _ = tuned_minimax(next_bstr, depth - 1, alpha, beta, -1)
+            if eval > maxEval:
+                maxEval = eval
+                optimalMove = next_bstr
+            alpha = max(alpha, eval)
+            if beta <= alpha:
+                break
+        result = (maxEval, optimalMove)
+        transposition_table[key] = result
+        return result
     else:
         minEval = 99
-        for i in range(8):
-            for j in range(8):   
-                for d in ['L', 'R', '-L', '-R']:
-                    if tempBoard.moveAllowed(i, j, d, -1):
-                        tempBoard.move(i, j, d, -1)
-                        eval, _ = tuned_minimax(tempBoard.getString(), depth - 1, alpha, beta, 1)
-                        if eval < minEval:
-                            minEval = eval
-                            optimalMove = tempBoard.getString()
-                            optD = str(i) + ' ' + str(j) + ' ' + d
-                        tempBoard.editBoard(originalBoard)
-                        beta = min(beta, eval)
-                        if beta <= alpha:
-                            break
-        return minEval, optimalMove
+        for next_bstr in legal_moves:
+            eval, _ = tuned_minimax(next_bstr, depth - 1, alpha, beta, 1)
+            if eval < minEval:
+                minEval = eval
+                optimalMove = next_bstr
+            beta = min(beta, eval)
+            if beta <= alpha:
+                break
+        result = (minEval, optimalMove)
+        transposition_table[key] = result
+        return result
 
 def evaluate(string):
     global evalCalls
@@ -109,6 +143,7 @@ def boosted_depth_for_endgame(bstr, turn, depth):
     return min(depth + bonus, 14)
 
 def botPlay(bstr = 'A', difficulty=5, turn=1, moves=0, constantDepth = False):
+    transposition_table.clear()
     if constantDepth:
         depth = difficulty
     else:
