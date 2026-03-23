@@ -9,7 +9,6 @@ def tuned_minimax(bstr, depth, alpha, beta, turn):
     tempBoard = bd.Board(bstr)
     originalBoard = bstr
     optimalMove = ''
-    optD = ''
     
     if tempBoard.endGame(turn):
         return tempBoard.utility(turn), optimalMove

@@ -4,6 +4,8 @@ import minimaxV1 as v1
 import botV2 as bv2
 import time
 import pygame
+import argparse
+import random
 
 # Constant and Pygame setup
 WIDTH = 800
@@ -36,45 +38,6 @@ def countPieces(bstr):
             count += 1
     return count
 
-    board = bd.Board(intialPos)
-    board.betterPrintBoard()
-    turn = 1
-    moves = 0
-    global evalCalls
-    while not board.endGame(turn) and moves < 51:
-        cp1 = countPieces(board.getString())
-        print("Player ", turn, " turn")
-        if turn == 1:
-            timeStart = time.time()
-            curPos = board.getString()
-            suggestedPos = bv2.botPlay(curPos, 6, turn, moves, True)
-            timeEnd = time.time()
-            print('Time to evaluate: ', timeEnd - timeStart)
-            board.editBoard(suggestedPos)
-            board.betterPrintBoard()
-            turn = -turn
-            evalCalls = 0
-        else:
-            timeStart = time.time()
-            curPos = board.getString()
-            suggestedPos = bp.botPlay(curPos, 6, turn, moves, True)
-            timeEnd = time.time()
-            print('Time to evaluate: ', timeEnd - timeStart)
-            board.editBoard(suggestedPos)
-            board.betterPrintBoard()
-            turn = -turn
-            evalCalls = 0
-        cp2 = countPieces(board.getString())
-        if cp1 == cp2:
-            moves += 1
-        else:
-            moves = 0
-            
-    if board.utility(turn) == 1:
-        print("Player 1 wins")
-    else:
-        print("Player 2 wins")    
-
 # bstr is a string with 64 characters symbolize board: w is white piece, b is black piece, 0 is empty, W is white king, B is black king
 def drawBoard(bstr):
     for i in range(8):
@@ -101,17 +64,49 @@ def drawPieces(bstr):
             pygame.draw.circle(SCREEN, YELLOW, (col * SQUARE_SIZE + SQUARE_SIZE // 2, row * SQUARE_SIZE + SQUARE_SIZE // 2), RADIUS // 2)
             
 
+def parse_args():
+    parser = argparse.ArgumentParser(description='Checkers runner configuration')
+    parser.add_argument('--mode', type=int, default=0, choices=[0, 1], help='0: human vs bot, 1: bot vs bot')
+    parser.add_argument('--depth', type=int, default=6, help='Depth for bot in mode 0 (-1 = random bot)')
+    parser.add_argument('--depth1', type=int, default=1, help='Depth for player 1 bot in mode 1 (-1 = random bot)')
+    parser.add_argument('--depth2', type=int, default=6, help='Depth for player 2 bot in mode 1 (-1 = random bot)')
+    parser.add_argument('--bot-delay', type=int, default=0, help='Delay between bot moves in ms (mode 1)')
+    return parser.parse_args()
+
+
+def random_bot_play(bstr, turn):
+    temp_board = bd.Board(bstr)
+    candidates = []
+    for i in range(8):
+        for j in range(8):
+            for d in ['L', 'R', '-L', '-R']:
+                if temp_board.moveAllowed(i, j, d, turn):
+                    temp_board.move(i, j, d, turn)
+                    candidates.append(temp_board.getString())
+                    temp_board.editBoard(bstr)
+    if not candidates:
+        return bstr
+    return random.choice(candidates)
+
+
+def bot_play_with_depth(bstr, depth, turn):
+    if depth == -1:
+        return random_bot_play(bstr, turn)
+    return bp.botPlay(bstr, depth, turn, 0, True)
+
+
 def main():
-    MODE = 0
-    DEPTH = 6
-    DEPTH1 = 1
-    DEPTH2 = 6
+    args = parse_args()
+    MODE = args.mode
+    DEPTH = args.depth
+    DEPTH1 = args.depth1
+    DEPTH2 = args.depth2
     # Mode = 0: Play game angainst bot
     # Mode = 1: Two bots play against each other
     # Depth = 6 take on average 1.5 seconds to run a move
     # Depth = 8 take roughly 15 seconds to run a move
     # Depth = 10 take roughly 2 minutes to run a move, only use to solve puzzles
-    BOT_DELAY = 0
+    BOT_DELAY = args.bot_delay
     
     pygame.init()
     run = True
@@ -205,7 +200,7 @@ def main():
                         run = False
                 timeStart = time.time()
                 curPos = board.getString()
-                suggestedPos = bp.botPlay(curPos, DEPTH, turn, 0, True)
+                suggestedPos = bot_play_with_depth(curPos, DEPTH, turn)
                 timeEnd = time.time()
                 print('Time to evaluate: ', timeEnd - timeStart)
                 print('Number of evaluations: ', evalCalls)
@@ -249,7 +244,7 @@ def main():
                         run = False
                 timeStart = time.time()
                 curPos = board.getString()
-                suggestedPos = bp.botPlay(curPos, DEPTH1, turn, 0, True)
+                suggestedPos = bot_play_with_depth(curPos, DEPTH1, turn)
                 timeEnd = time.time()
                 print('Time to evaluate: ', timeEnd - timeStart)
                 board.editBoard(suggestedPos)
@@ -265,7 +260,7 @@ def main():
                         run = False
                 timeStart = time.time()
                 curPos = board.getString()
-                suggestedPos = bp.botPlay(curPos, DEPTH2, turn, 0, True)
+                suggestedPos = bot_play_with_depth(curPos, DEPTH2, turn)
                 timeEnd = time.time()
                 print('Time to evaluate: ', timeEnd - timeStart)
                 board.editBoard(suggestedPos)

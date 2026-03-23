@@ -1,11 +1,6 @@
 # Main file
 
-import sys
-import math
-import copy
-import string
-import time
-import os
+
 
 # Board and pieces
 intialPos = '0b0b0b0bb0b0b0b00b0b0b0b0000000000000000w0w0w0w00w0w0w0ww0w0w0w0'
