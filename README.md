@@ -50,4 +50,5 @@ Alternative models (not recommended):
 To switch models, edit the imports and modify the `bot_play_with_depth()` function in runner.py to use the desired model.
 
 ## Citation information
-Nguyen Huu Nam Phong - First year student at HCMUT, Vietnam.
+Nguyen Huu Nam Phong - First year student at HCMUT, Vietnam (2023)
+Team Asignment Introduction of AI - Modifications and updates (2026)
