@@ -41,7 +41,7 @@ python runner.py --mode 0 --depth -1
 ```
 
 ### Changing the AI Model (Advanced)
-The current best model is `bp` (bot.py), which uses Alpha-Beta Pruning with move ordering and transposition tables. It's already the default in runner.py.
+The current best model is `bp` (bot.py), which uses Alpha-Beta Pruning with move ordering. It's already the default in runner.py.
 
 Alternative models (not recommended):
 - `bv2` (botV2.py): Alpha-Beta with position evaluation heuristics (slower, less optimized)
