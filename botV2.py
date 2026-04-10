@@ -54,6 +54,15 @@ def stillInBoard(i, j):
     return i >= 0 and i < 8 and j >= 0 and j < 8
 
 def evaluate(string):
+    def centerWeight(i, j):
+        if i in [3, 4] and j in [3, 4]:
+            return 1.5
+        elif i in [2, 5] and j in [2, 3, 4, 5]:
+            return 1.3
+        elif i in [1, 6] and j in [1, 2, 3, 4, 5, 6]:
+            return 1.1
+        elif i in [0, 7] and j in [0, 1, 2, 3, 4, 5, 6, 7]:
+            return 1.0
     global evalCalls
     evalCalls += 1
     board = bd.Board(string)
@@ -67,9 +76,9 @@ def evaluate(string):
     for i in range(8):
         for j in range(8):
             if board.board[i][j] > 0:
-                scoreW += board.board[i][j]
+                scoreW += board.board[i][j] * centerWeight(i, j)
             elif board.board[i][j] < 0:
-                scoreB += -board.board[i][j]
+                scoreB += -board.board[i][j] * centerWeight(i, j)
     pieceW = scoreW
     pieceB = scoreB
     """

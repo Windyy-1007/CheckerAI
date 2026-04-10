@@ -67,9 +67,9 @@ def drawPieces(bstr):
 def parse_args():
     parser = argparse.ArgumentParser(description='Checkers runner configuration')
     parser.add_argument('--mode', type=int, default=0, choices=[0, 1], help='0: human vs bot, 1: bot vs bot')
-    parser.add_argument('--depth', type=int, default=6, help='Depth for bot in mode 0 (-1 = random bot)')
-    parser.add_argument('--depth1', type=int, default=1, help='Depth for player 1 bot in mode 1 (-1 = random bot)')
-    parser.add_argument('--depth2', type=int, default=6, help='Depth for player 2 bot in mode 1 (-1 = random bot)')
+    parser.add_argument('--depth', type=int, default=10, help='Depth for bot in mode 0 (-1 = random bot)')
+    parser.add_argument('--depth1', type=int, default=6, help='Depth for player 1 bot in mode 1 (-1 = random bot)')
+    parser.add_argument('--depth2', type=int, default=10, help='Depth for player 2 bot in mode 1 (-1 = random bot)')
     parser.add_argument('--bot-delay', type=int, default=0, help='Delay between bot moves in ms (mode 1)')
     return parser.parse_args()
 
@@ -194,7 +194,7 @@ def main():
                                 break
                 SCREEN.fill(WHITE)
             elif turn == -1 and not board.endGame(turn):
-                print("Player ", turn, " turn")
+                print("Black's turn")
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         run = False
@@ -204,6 +204,7 @@ def main():
                 timeEnd = time.time()
                 print('Time to evaluate: ', timeEnd - timeStart)
                 print('Number of evaluations: ', evalCalls)
+                print('=============================')
                 board.editBoard(suggestedPos)
                 turn = -turn
                 SCREEN.fill(WHITE)
@@ -211,13 +212,13 @@ def main():
                 drawPieces(board.getString())
                 pygame.display.update()
             elif board.utility(turn) == 1:
-                print("Player 1 wins")
+                print("White wins")
                 MODE = 2
                 run = False
                 run2 = True
                     
             else:
-                print("Player 2 wins")
+                print("Black wins")
                 MODE = 2
                 run = False
                 run2 = True
@@ -238,7 +239,7 @@ def main():
                 drawBoard(board.getString())
                 drawPieces(board.getString())
                 pygame.display.update()
-                print("Player ", turn, " turn")
+                print("White's turn")
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         run = False
@@ -254,7 +255,7 @@ def main():
                 drawPieces(board.getString())
                 pygame.display.update()
             elif turn == -1 and not board.endGame(turn):
-                print("Player ", turn, " turn")
+                print("Black's turn")
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT: 
                         run = False
@@ -271,12 +272,12 @@ def main():
                 pygame.display.update()
             if board.endGame(turn):
                 if board.utility(turn) == 1:
-                    print("Player 1 wins")
+                    print("White wins")
                     MODE = 2
                     run = False
                     run2 = True
                 else:
-                    print("Player 2 wins")
+                    print("Black wins")
                     MODE = 2
                     run = False
                     run2 = True
