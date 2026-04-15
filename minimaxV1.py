@@ -1,6 +1,7 @@
 import copy
 import board as bd
 import math
+import random
 
 def evaluate(string):
     global evalCalls
@@ -16,8 +17,15 @@ def evaluate(string):
         for j in range(8):
             if board.board[i][j] > 0:
                 scoreW += board.board[i][j]
+                # Bonus for being in the center
+                if (i == 3 or i == 4) and (j == 3 or j == 4):
+                    scoreW += 0.5
             elif board.board[i][j] < 0:
                 scoreB += -board.board[i][j]
+                # Bonus for being in the center
+                if (i == 3 or i == 4) and (j == 3 or j == 4):
+                    scoreB += 0.5
+
     return round(2*((scoreW) / (scoreB + scoreW)) - 1, 5)
 
 def min_value(str, depth = 10, currentV=math.inf):
@@ -84,7 +92,7 @@ def minimax(str, depth, turn):
     print ('Depth= ', depth)
     tempBoard = bd.Board(str)
     backupBoard = bd.Board(str)
-    optimalMove = 'N'
+    optimalMoves = []
     if turn == 1:
         v = -math.inf
         for i in range(8):
@@ -93,27 +101,39 @@ def minimax(str, depth, turn):
                     continue
                 if tempBoard.moveAllowed(i, j, 'L', 1):
                     tempBoard.move(i, j, 'L', 1)
-                    if(min_value(tempBoard.getString(), depth - 1) > v):
-                        v = min_value(tempBoard.getString(), depth - 1)
-                        optimalMove = tempBoard.getString()
+                    move_value = min_value(tempBoard.getString(), depth - 1)
+                    if move_value > v:
+                        v = move_value
+                        optimalMoves = [tempBoard.getString()]
+                    elif move_value == v:
+                        optimalMoves.append(tempBoard.getString())
                     tempBoard.board = copy.deepcopy(backupBoard.board)
                 if tempBoard.moveAllowed(i, j, 'R', 1):
                     tempBoard.move(i, j, 'R', 1)
-                    if(min_value(tempBoard.getString(), depth - 1) > v):
-                        v = min_value(tempBoard.getString(), depth - 1)
-                        optimalMove = tempBoard.getString()
+                    move_value = min_value(tempBoard.getString(), depth - 1)
+                    if move_value > v:
+                        v = move_value
+                        optimalMoves = [tempBoard.getString()]
+                    elif move_value == v:
+                        optimalMoves.append(tempBoard.getString())
                     tempBoard.board = copy.deepcopy(backupBoard.board)
                 if tempBoard.moveAllowed(i, j, '-L', 1):
                     tempBoard.move(i, j, '-L', 1)
-                    if(min_value(tempBoard.getString(), depth - 1) > v):
-                        v = min_value(tempBoard.getString(), depth - 1)
-                        optimalMove = tempBoard.getString()
+                    move_value = min_value(tempBoard.getString(), depth - 1)
+                    if move_value > v:
+                        v = move_value
+                        optimalMoves = [tempBoard.getString()]
+                    elif move_value == v:
+                        optimalMoves.append(tempBoard.getString())
                     tempBoard.board = copy.deepcopy(backupBoard.board)
                 if tempBoard.moveAllowed(i, j, '-R', 1):
                     tempBoard.move(i, j, '-R', 1)
-                    if(min_value(tempBoard.getString(), depth - 1) > v):
-                        v = min_value(tempBoard.getString(), depth - 1)
-                        optimalMove = tempBoard.getString()
+                    move_value = min_value(tempBoard.getString(), depth - 1)
+                    if move_value > v:
+                        v = move_value
+                        optimalMoves = [tempBoard.getString()]
+                    elif move_value == v:
+                        optimalMoves.append(tempBoard.getString())
                     tempBoard.board = copy.deepcopy(backupBoard.board)
     else:
         v = math.inf
@@ -124,34 +144,46 @@ def minimax(str, depth, turn):
                 
                 if tempBoard.moveAllowed(i, j, 'L', -1):
                     tempBoard.move(i, j, 'L', -1)
-                    if(max_value(tempBoard.getString(), depth - 1) < v):
-                        v = max_value(tempBoard.getString(), depth - 1)
-                        optimalMove = tempBoard.getString()
+                    move_value = max_value(tempBoard.getString(), depth - 1)
+                    if move_value < v:
+                        v = move_value
+                        optimalMoves = [tempBoard.getString()]
                         print(i, j, 'L', -1, v)
+                    elif move_value == v:
+                        optimalMoves.append(tempBoard.getString())
                     tempBoard.board = copy.deepcopy(backupBoard.board)
                     
                 if tempBoard.moveAllowed(i, j, 'R', -1):
                     tempBoard.move(i, j, 'R', -1)
-                    if(max_value(tempBoard.getString(), depth - 1) < v):
-                        v = max_value(tempBoard.getString(), depth - 1)
-                        optimalMove = tempBoard.getString()
+                    move_value = max_value(tempBoard.getString(), depth - 1)
+                    if move_value < v:
+                        v = move_value
+                        optimalMoves = [tempBoard.getString()]
                         print(i, j, 'R', -1, v)
+                    elif move_value == v:
+                        optimalMoves.append(tempBoard.getString())
                     tempBoard.board = copy.deepcopy(backupBoard.board)
                     
                 if tempBoard.moveAllowed(i, j, '-L', -1):
                     tempBoard.move(i, j, '-L', -1)
-                    if(max_value(tempBoard.getString(), depth - 1) < v):
-                        v = max_value(tempBoard.getString(), depth - 1)
-                        optimalMove = tempBoard.getString()
+                    move_value = max_value(tempBoard.getString(), depth - 1)
+                    if move_value < v:
+                        v = move_value
+                        optimalMoves = [tempBoard.getString()]
                         print(i, j, '-L', -1, v)
+                    elif move_value == v:
+                        optimalMoves.append(tempBoard.getString())
                     tempBoard.board = copy.deepcopy(backupBoard.board)
                     
                 if tempBoard.moveAllowed(i, j, '-R', -1):
                     tempBoard.move(i, j, '-R', -1)
-                    if(max_value(tempBoard.getString(), depth - 1) < v):
-                        v = max_value(tempBoard.getString(), depth - 1)
-                        optimalMove = tempBoard.getString()
+                    move_value = max_value(tempBoard.getString(), depth - 1)
+                    if move_value < v:
+                        v = move_value
+                        optimalMoves = [tempBoard.getString()]
                         print(i, j, '-R', -1, v)
+                    elif move_value == v:
+                        optimalMoves.append(tempBoard.getString())
                     tempBoard.board = copy.deepcopy(backupBoard.board)
     print ('Current evaluation: ' ,v)
-    return optimalMove
+    return random.choice(optimalMoves) if optimalMoves else 'N'

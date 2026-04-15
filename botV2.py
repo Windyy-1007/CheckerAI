@@ -9,7 +9,6 @@ def tuned_minimax(bstr, depth, alpha, beta, turn):
     tempBoard = bd.Board(bstr)
     originalBoard = bstr
     optimalMove = ''
-    optD = ''
     
     if tempBoard.endGame(turn):
         return tempBoard.utility(turn), optimalMove
@@ -55,6 +54,15 @@ def stillInBoard(i, j):
     return i >= 0 and i < 8 and j >= 0 and j < 8
 
 def evaluate(string):
+    def centerWeight(i, j):
+        if i in [3, 4] and j in [3, 4]:
+            return 1.5
+        elif i in [2, 5] and j in [2, 3, 4, 5]:
+            return 1.3
+        elif i in [1, 6] and j in [1, 2, 3, 4, 5, 6]:
+            return 1.1
+        elif i in [0, 7] and j in [0, 1, 2, 3, 4, 5, 6, 7]:
+            return 1.0
     global evalCalls
     evalCalls += 1
     board = bd.Board(string)
@@ -68,9 +76,9 @@ def evaluate(string):
     for i in range(8):
         for j in range(8):
             if board.board[i][j] > 0:
-                scoreW += board.board[i][j]
+                scoreW += board.board[i][j] * centerWeight(i, j)
             elif board.board[i][j] < 0:
-                scoreB += -board.board[i][j]
+                scoreB += -board.board[i][j] * centerWeight(i, j)
     pieceW = scoreW
     pieceB = scoreB
     """
@@ -204,24 +212,8 @@ def botPlay(bstr = 'A', difficulty=5, turn=1, moves=0, constantDepth = False):
         moveWeigth = 0.1
         depth = math.floor(difficulty / (endGameWeigth * num_pieces + 0.4) + max(moveWeigth*(moves - 50), 0)) 
     print ('Depth (bp): ', depth)
-    
-    
-    """
-    with open('dict6.txt', 'r') as file:
-        # Each line will have 3 values: str, mstr, eval
-        for line in file:
-            if bstr == line.split()[0]:
-                eval = line.split()[2]
-                print ('Evaluation: ', eval)
-                return line.split()[1]
-    
-    """
             
     eval, mstr = tuned_minimax(bstr, depth, -math.inf, math.inf, turn)
-    # Add str, msr, eval to the file
-    # Turn evaluation to string
-    with open('dict6.txt', 'a') as file:
-        file.write(bstr + ',' + mstr + ',' + str(eval) + '\n')
     print ('Evaluation: ', eval)
     global evalCalls
     print ('Number of calculated positions: ', evalCalls)

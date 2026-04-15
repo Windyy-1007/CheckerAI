@@ -1,11 +1,6 @@
 # Main file
 
-import sys
-import math
-import copy
-import string
-import time
-import os
+
 
 # Board and pieces
 intialPos = '0b0b0b0bb0b0b0b00b0b0b0b0000000000000000w0w0w0w00w0w0w0ww0w0w0w0'
@@ -103,7 +98,7 @@ class Board:
                 if(self.board[i][j] > 0):
                     sum += 1
         if sum == 0:
-            print ("Win by no pieces left")
+            # print ("Win by no pieces left")
             return True
         sum = 0
         for i in range(8):
@@ -111,11 +106,11 @@ class Board:
                 if(self.board[i][j] < 0):
                     sum += 1
         if sum == 0:
-            print ("Win by no pieces left")
+            # print ("Win by no pieces left")
             return True
         
         if not self.moveAvailable(turn):
-            print ("Win by no moves left")
+            # print ("Win by no moves left")
             return True
         return False
 
