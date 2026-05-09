@@ -68,9 +68,17 @@ def drawPieces(bstr):
 def parse_args():
     parser = argparse.ArgumentParser(description='Checkers runner configuration')
     parser.add_argument('--mode', type=int, default=0, choices=[0, 1], help='0: human vs bot, 1: bot vs bot')
-    parser.add_argument('--depth', type=int, default=10, help='Depth for bot in mode 0 (-1 = random bot, -2 = RL bot)')
-    parser.add_argument('--depth1', type=int, default=6, help='Depth for player 1 bot in mode 1 (-1 = random bot, -2 = RL bot)')
-    parser.add_argument('--depth2', type=int, default=10, help='Depth for player 2 bot in mode 1 (-1 = random bot, -2 = RL bot)')
+    parser.add_argument('--depth', type=int, default=10, help='Depth for minimax bot in mode 0 (-1 = random bot)')
+    parser.add_argument('--depth1', type=int, default=6, help='Depth for player 1 minimax in mode 1 (-1 = random bot)')
+    parser.add_argument('--depth2', type=int, default=10, help='Depth for player 2 minimax in mode 1 (-1 = random bot)')
+    parser.add_argument('--bot-type', type=str, default='minimax', choices=['minimax', 'random', 'rl'],
+                        help='Bot type for mode 0 opponent')
+    parser.add_argument('--bot1-type', type=str, default='minimax', choices=['minimax', 'random', 'rl'],
+                        help='Bot type for player 1 (white) in mode 1')
+    parser.add_argument('--bot2-type', type=str, default='minimax', choices=['minimax', 'random', 'rl'],
+                        help='Bot type for player 2 (black) in mode 1')
+    parser.add_argument('--rl-difficulty', type=int, default=10, choices=range(1, 11), metavar='1-10',
+                        help='RL bot difficulty 1-10 (10 = hardest)')
     parser.add_argument('--bot-delay', type=int, default=0, help='Delay between bot moves in ms (mode 1)')
     parser.add_argument('--rl-policy', type=str, default=None, help='Path to RL policy file (default: rl/policies/default.pkl)')
     return parser.parse_args()
@@ -91,10 +99,10 @@ def random_bot_play(bstr, turn):
     return random.choice(candidates)
 
 
-def bot_play_with_depth(bstr, depth, turn, rl_policy=None):
-    if depth == -2:
-        return rl_bot_play(bstr, turn, policy_path=rl_policy)
-    if depth == -1:
+def bot_play_with_depth(bstr, depth, turn, bot_type='minimax', rl_policy=None, rl_difficulty=10):
+    if bot_type == 'rl':
+        return rl_bot_play(bstr, turn, policy_path=rl_policy, difficulty=rl_difficulty)
+    if bot_type == 'random' or depth == -1:
         return random_bot_play(bstr, turn)
     return bp.botPlay(bstr, depth, turn, 0, True)
 
@@ -105,13 +113,16 @@ def main():
     DEPTH = args.depth
     DEPTH1 = args.depth1
     DEPTH2 = args.depth2
+    BOT_TYPE = args.bot_type
+    BOT1_TYPE = args.bot1_type
+    BOT2_TYPE = args.bot2_type
+    RL_DIFFICULTY = args.rl_difficulty
     RL_POLICY = args.rl_policy
     # Mode = 0: Play game angainst bot
     # Mode = 1: Two bots play against each other
     # Depth = 6 take on average 1.5 seconds to run a move
     # Depth = 8 take roughly 15 seconds to run a move
     # Depth = 10 take roughly 2 minutes to run a move, only use to solve puzzles
-    # Depth = -2: RL bot
     BOT_DELAY = args.bot_delay
     
     pygame.init()
@@ -206,7 +217,7 @@ def main():
                         run = False
                 timeStart = time.time()
                 curPos = board.getString()
-                suggestedPos = bot_play_with_depth(curPos, DEPTH, turn, RL_POLICY)
+                suggestedPos = bot_play_with_depth(curPos, DEPTH, turn, BOT_TYPE, RL_POLICY, RL_DIFFICULTY)
                 timeEnd = time.time()
                 print('Time to evaluate: ', timeEnd - timeStart)
                 print('Number of evaluations: ', evalCalls)
@@ -251,7 +262,7 @@ def main():
                         run = False
                 timeStart = time.time()
                 curPos = board.getString()
-                suggestedPos = bot_play_with_depth(curPos, DEPTH1, turn, RL_POLICY)
+                suggestedPos = bot_play_with_depth(curPos, DEPTH1, turn, BOT1_TYPE, RL_POLICY, RL_DIFFICULTY)
                 timeEnd = time.time()
                 print('Time to evaluate: ', timeEnd - timeStart)
                 board.editBoard(suggestedPos)
@@ -267,7 +278,7 @@ def main():
                         run = False
                 timeStart = time.time()
                 curPos = board.getString()
-                suggestedPos = bot_play_with_depth(curPos, DEPTH2, turn, RL_POLICY)
+                suggestedPos = bot_play_with_depth(curPos, DEPTH2, turn, BOT2_TYPE, RL_POLICY, RL_DIFFICULTY)
                 timeEnd = time.time()
                 print('Time to evaluate: ', timeEnd - timeStart)
                 board.editBoard(suggestedPos)

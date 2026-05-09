@@ -227,12 +227,15 @@ class RLBot:
 
 # ---------- convenience for runner.py ----------
 
-def rl_bot_play(bstr, turn, policy_path=None):
+def rl_bot_play(bstr, turn, policy_path=None, difficulty=10):
     """Drop-in replacement matching bot.botPlay signature style.
 
+    difficulty: 1-10, where 10 is fully greedy and 1 is mostly random.
     Returns the best successor board string.
     """
     if policy_path is None:
         policy_path = DEFAULT_POLICY
-    bot = RLBot(policy_path=policy_path, epsilon=0.0)
-    return bot.best_move(bstr, turn)
+    # Map difficulty 1-10 to epsilon: 1 -> 0.9 (mostly random), 10 -> 0.0 (greedy)
+    epsilon = max(0.0, (10 - difficulty) / 10.0)
+    bot = RLBot(policy_path=policy_path, epsilon=epsilon)
+    return bot.choose_move(bstr, turn)
