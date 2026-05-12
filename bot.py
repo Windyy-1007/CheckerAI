@@ -121,8 +121,8 @@ def material_ratio(bstr):
     return (scoreW - scoreB) / total
 
 
-def boosted_depth_for_endgame(bstr, turn, depth):
-    if depth < 0:
+def boosted_depth_for_endgame(bstr, turn, depth, no_boost=False):
+    if no_boost or depth < 0:
         return depth
 
     pieces = 64 - bstr.count('0')
@@ -142,7 +142,7 @@ def boosted_depth_for_endgame(bstr, turn, depth):
 
     return min(depth + bonus, 20)
 
-def botPlay(bstr = 'A', difficulty=5, turn=1, moves=0, constantDepth = False):
+def botPlay(bstr = 'A', difficulty=5, turn=1, moves=0, constantDepth = False, no_endgame_boost=False):
     transposition_table.clear()
     if constantDepth:
         depth = difficulty
@@ -151,7 +151,7 @@ def botPlay(bstr = 'A', difficulty=5, turn=1, moves=0, constantDepth = False):
         endGameWeigth = 0.025
         moveWeigth = 0.1
         depth = math.floor(difficulty / (endGameWeigth * num_pieces + 0.4) + max(moveWeigth*(moves - 50), 0)) 
-    boosted_depth = boosted_depth_for_endgame(bstr, turn, depth)
+    boosted_depth = boosted_depth_for_endgame(bstr, turn, depth, no_endgame_boost)
     print ('Depth (bp): ', depth, '->', boosted_depth)
             
     eval, mstr = tuned_minimax(bstr, boosted_depth, -math.inf, math.inf, turn)
